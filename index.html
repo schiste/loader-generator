@@ -204,8 +204,9 @@
         </button>
       </div>
 
-      <!-- Real-usage size contexts: see how the loader holds up small + in a button -->
-      <div class="flex items-center justify-between gap-3 bg-slate-900/40 border border-slate-800/60 rounded-xl px-4 py-3">
+      <!-- Real-usage size contexts: see how the loader holds up small + in a button.
+           The minis spin only on hover to avoid 4 always-composited animated layers. -->
+      <div id="miniStrip" class="flex items-center justify-between gap-3 bg-slate-900/40 border border-slate-800/60 rounded-xl px-4 py-3">
         <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">At real sizes</span>
         <div class="flex items-end gap-4">
           <div class="flex flex-col items-center gap-1">
@@ -2653,7 +2654,14 @@
       setupSections();
       enhanceA11y();
       addTooltips();
-      document.querySelectorAll('.mini-spin').forEach(el => el.classList.add('spin-target'));
+      // Minis spin only while the strip is hovered — keeps the idle page to a
+      // single animated layer (the main preview) instead of five.
+      const miniStrip = document.getElementById('miniStrip');
+      const minis = [...document.querySelectorAll('.mini-spin')];
+      if (miniStrip) {
+        miniStrip.addEventListener('mouseenter', () => minis.forEach(m => m.classList.add('spin-target')));
+        miniStrip.addEventListener('mouseleave', () => minis.forEach(m => m.classList.remove('spin-target')));
+      }
       [['sizeVal','sliderSize'],['thicknessVal','sliderThickness'],['sweepVal','sliderSweep'],['speedVal','sliderSpeed'],['offsetVal','sliderOffset'],['hueSpeedVal','sliderHueSpeed'],['dashCountVal','sliderDashCount'],['dashGapVal','sliderDashGap'],['blurVal','sliderBlur'],['trackOpacityVal','sliderTrackOpacity']].forEach(([s, sl]) => makeEditable(s, sl));
       DEFAULTS = readConfig(); // snapshot the pristine HTML defaults for Reset
 
