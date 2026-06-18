@@ -1053,10 +1053,11 @@
     function drawPlaygroundLoader(canvas, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, isGlow = false) {
       const ctx = canvas.getContext('2d');
       const dpr = window.devicePixelRatio || 1;
-
-      canvas.width = size * dpr;
-      canvas.height = size * dpr;
-      ctx.scale(dpr, dpr);
+      const px = Math.round(size * dpr);
+      // Only resize when needed — setting canvas.width reallocates the backing
+      // store every time, which is the main per-frame cost during morphing.
+      if (canvas.width !== px || canvas.height !== px) { canvas.width = px; canvas.height = px; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, size, size);
 
       const strokeWidth = thickness;
@@ -1109,7 +1110,8 @@
 
       // Handle Tapered / Comet Conical Sweep Drawing
       if ((tapered || comet) && shape === 'circle') {
-        const segments = 120;
+        // Scale segment count to the radius — 120 on a big loader is overkill on a 16px mini.
+        const segments = Math.max(36, Math.min(120, Math.round(size * 0.9)));
         ctx.lineCap = (sweepPercent < 100) ? 'butt' : strokeCap;
 
         for (let i = 0; i < segments; i++) {
@@ -1282,7 +1284,10 @@
 
     // Draw both canvas layers (ring + optional glow) for a given sweep.
     // Reading the inputs here keeps the static draw and the morph loop in sync.
-    function drawLoaderFrame(sweepOverride) {
+    // withMinis is throttled off on most morph frames (the minis are tiny and
+    // don't need to redraw at the full frame rate).
+    let miniCanvases = null;
+    function drawLoaderFrame(sweepOverride, withMinis = true) {
       const size = parseInt(sliderSize.value);
       const thickness = parseInt(sliderThickness.value);
       const shape = selectShape.value;
@@ -1303,17 +1308,21 @@
       }
 
       // Mini "real size" previews — same design, scaled thickness, no glow layer.
-      document.querySelectorAll('canvas[data-mini]').forEach(c => {
-        const ms = parseInt(c.dataset.mini);
-        const mt = Math.max(2, Math.round(thickness * ms / size));
-        drawPlaygroundLoader(c, ms, mt, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, false);
-      });
+      if (withMinis) {
+        if (!miniCanvases) miniCanvases = [...document.querySelectorAll('canvas[data-mini]')];
+        miniCanvases.forEach(c => {
+          const ms = parseInt(c.dataset.mini);
+          const mt = Math.max(2, Math.round(thickness * ms / size));
+          drawPlaygroundLoader(c, ms, mt, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, false);
+        });
+      }
     }
 
     // Morph animation: continuously expand/contract the active sweep length
     // (Material Design style) while the container spins via CSS.
     let morphRafId = null;
     let morphStart = null;
+    let morphFrame = 0;
     function morphTick(ts) {
       if (!toggleMorph.checked || isPaused) { morphRafId = null; morphStart = null; return; }
       if (morphStart === null) morphStart = ts;
@@ -1330,7 +1339,7 @@
       const effectiveSweep = minSweep + (maxSweep - minSweep) * t;
       // -------------------------------------------------------------------
 
-      drawLoaderFrame(effectiveSweep);
+      drawLoaderFrame(effectiveSweep, (morphFrame++ % 4) === 0); // minis at ~1/4 rate
       morphRafId = requestAnimationFrame(morphTick);
     }
     function startOrStopMorph() {
@@ -1444,7 +1453,14 @@
       }
 
       generateExportTemplates();
-      saveState();
+      scheduleSave();
+    }
+
+    // Coalesce localStorage writes — no need to persist on every drag frame.
+    let saveTimer = null;
+    function scheduleSave() {
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { saveTimer = null; saveState(); }, 250);
     }
 
     // Generator Export Tab Handler
