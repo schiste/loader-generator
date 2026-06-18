@@ -1,7 +1,14 @@
-# loader-generator
+# Loader Generator
 
-> **Hue-Shift Loader Lab** — a browser-based visual generator for animated loading
-> spinners, with live preview and one-click export to CSS, Canvas, or SVG.
+[![Live demo](https://img.shields.io/badge/demo-live-22c55e?style=flat-square)](https://schiste.github.io/loader-generator/)
+[![CI](https://img.shields.io/github/actions/workflow/status/schiste/loader-generator/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/schiste/loader-generator/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-a855f7?style=flat-square)](./LICENSE)
+
+A browser-based visual generator for animated loading spinners — tweak it live and
+copy production-ready **CSS**, **Canvas**, or **SVG**. No build step, no
+dependencies, no sign-up.
+
+### ▶︎ [Try it live → schiste.github.io/loader-generator](https://schiste.github.io/loader-generator/)
 
 ## What it does
 
