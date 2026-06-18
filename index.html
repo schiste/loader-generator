@@ -106,6 +106,18 @@
       outline: 2px solid #a855f7 !important;
       outline-offset: 2px;
     }
+
+    /* Syntax highlight tokens for the export code panel */
+    .tok-comment { color: #64748b; font-style: italic; }
+    .tok-string  { color: #86efac; }
+    .tok-tag     { color: #f0abfc; }
+    .tok-attr    { color: #7dd3fc; }
+    .tok-num     { color: #fcd34d; }
+    .tok-color   { color: #fda4af; }
+
+    /* Click-to-edit value readouts */
+    .val-edit { cursor: text; border-radius: 4px; }
+    .val-edit:hover { background: rgba(168,85,247,0.12); }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col selection:bg-purple-500/30">
@@ -204,13 +216,21 @@
               SVG Vector
             </button>
           </div>
-          <button id="btnCopy" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-[11px] px-3.5 py-1.5 rounded-lg transition-all shadow-lg shadow-purple-600/10 active:scale-95 flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-            Copy Code
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button id="btnExpand" aria-label="Expand code panel" title="Expand / collapse" class="text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 p-1.5 rounded-lg transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            </button>
+            <button id="btnDownload" aria-label="Download snippet" title="Download as file" class="text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 p-1.5 rounded-lg transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </button>
+            <button id="btnCopy" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-[11px] px-3.5 py-1.5 rounded-lg transition-all shadow-lg shadow-purple-600/10 active:scale-95 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+              Copy Code
+            </button>
+          </div>
         </div>
         <div class="relative flex-1">
-          <pre class="p-5 text-[11px] text-slate-300 overflow-x-auto max-h-[260px] bg-slate-950/40"><code id="codeOutput" class="language-html">Loading generator configurations...</code></pre>
+          <pre id="codePre" class="p-5 text-[11px] text-slate-300 overflow-x-auto max-h-[260px] bg-slate-950/40 transition-all"><code id="codeOutput" class="language-html">Loading generator configurations...</code></pre>
         </div>
       </div>
     </div>
@@ -1494,7 +1514,7 @@
 
         css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container, .loader-ring, .loader-glow { animation: none !important; }\n}`;
 
-        codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>`;
+        setCode(`${html}\n\n<style>\n${css}\n</style>`);
 
       } else if (activeTab === 'canvas') {
         // --- Tab 2: HTML5 Canvas code block ---
@@ -1683,7 +1703,7 @@
 
         css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container { animation: none !important; }\n}`;
 
-        codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>\n\n<script>\n${js}\n<\/script>`;
+        setCode(`${html}\n\n<style>\n${css}\n</style>\n\n<script>\n${js}\n<\/script>`);
 
       } else if (activeTab === 'svg') {
         // --- Tab 3: Native Vector SVG tab ---
@@ -1830,7 +1850,7 @@
 
         css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container { animation: none !important; }\n}`;
 
-        codeOutput.textContent = `${svgHtml}\n\n<style>\n${css}\n</style>`;
+        setCode(`${svgHtml}\n\n<style>\n${css}\n</style>`);
       }
     }
 
@@ -2152,9 +2172,93 @@
       }
     });
 
+    // ---- Code panel: syntax highlighting, expand, download ----
+    // Single-pass tokenizer (comments | strings | hex colours | numbers) so no
+    // region is wrapped twice. Copy/Download still read textContent, which
+    // decodes back to the exact original source.
+    function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function highlightCode(code) {
+      const re = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*|<!--[\s\S]*?-->)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(#[0-9a-fA-F]{3,8}\b)|(\b\d+(?:\.\d+)?(?:px|deg|s|%)?\b)/g;
+      let out = '', last = 0, m;
+      while ((m = re.exec(code))) {
+        out += escHtml(code.slice(last, m.index));
+        if (m[1]) out += `<span class="tok-comment">${escHtml(m[1])}</span>`;
+        else if (m[2]) out += `<span class="tok-string">${escHtml(m[2])}</span>`;
+        else if (m[3]) out += `<span class="tok-color">${escHtml(m[3])}</span>`;
+        else if (m[4]) out += `<span class="tok-num">${escHtml(m[4])}</span>`;
+        last = re.lastIndex;
+      }
+      out += escHtml(code.slice(last));
+      return out;
+    }
+    function setCode(text) {
+      try { codeOutput.innerHTML = highlightCode(text); }
+      catch (e) { codeOutput.textContent = text; }
+    }
+
+    let codeExpanded = false;
+    document.getElementById('btnExpand').addEventListener('click', () => {
+      codeExpanded = !codeExpanded;
+      const pre = document.getElementById('codePre');
+      pre.classList.toggle('max-h-[260px]', !codeExpanded);
+      pre.classList.toggle('max-h-[75vh]', codeExpanded);
+    });
+
+    document.getElementById('btnDownload').addEventListener('click', () => {
+      const name = `loader-${activeTab}.html`;
+      // Wrap the snippet in a minimal, centered standalone document so the file
+      // opens and renders the loader directly.
+      const doc = `<!doctype html>\n<html lang="en">\n<head><meta charset="utf-8"><title>${name}</title></head>\n<body style="display:grid;place-items:center;min-height:100vh;margin:0;background:#0b0f19">\n${codeOutput.textContent}\n</body>\n</html>`;
+      const blob = new Blob([doc], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Downloaded ${name}`);
+    });
+
+    // ---- Click-to-edit numeric readouts ----
+    function makeEditable(spanId, sliderId) {
+      const span = document.getElementById(spanId);
+      const slider = document.getElementById(sliderId);
+      if (!span || !slider) return;
+      span.classList.add('val-edit');
+      span.tabIndex = 0;
+      span.title = 'Click to type an exact value';
+      const open = () => {
+        if (span.querySelector('input')) return;
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.min = slider.min; inp.max = slider.max; inp.step = slider.step;
+        inp.value = slider.value;
+        inp.className = 'w-16 bg-slate-800 text-purple-300 text-right rounded px-1 outline-none border border-purple-500/40 font-mono text-[11px]';
+        span.textContent = '';
+        span.appendChild(inp);
+        inp.focus(); inp.select();
+        const commit = () => {
+          let v = parseFloat(inp.value);
+          if (isNaN(v)) v = parseFloat(slider.value);
+          v = Math.min(parseFloat(slider.max), Math.max(parseFloat(slider.min), v));
+          slider.value = v;
+          slider.dispatchEvent(new Event('input', { bubbles: true })); // updateLoader re-renders the span
+        };
+        inp.addEventListener('keydown', (e) => {
+          e.stopPropagation(); // don't let Enter bubble to the span and reopen the editor
+          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+          else if (e.key === 'Escape') { slider.dispatchEvent(new Event('input', { bubbles: true })); }
+        });
+        inp.addEventListener('blur', commit);
+        inp.addEventListener('click', (e) => e.stopPropagation());
+      };
+      span.addEventListener('click', open);
+      span.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(); });
+    }
+
     // Setup Startup Lifecycle
     function init() {
       labelControls();
+      [['sizeVal','sliderSize'],['thicknessVal','sliderThickness'],['sweepVal','sliderSweep'],['speedVal','sliderSpeed'],['offsetVal','sliderOffset'],['hueSpeedVal','sliderHueSpeed'],['dashCountVal','sliderDashCount'],['dashGapVal','sliderDashGap'],['blurVal','sliderBlur'],['trackOpacityVal','sliderTrackOpacity']].forEach(([s, sl]) => makeEditable(s, sl));
       DEFAULTS = readConfig(); // snapshot the pristine HTML defaults for Reset
 
       // Respect "reduce motion" by starting paused — but the Play button is a
