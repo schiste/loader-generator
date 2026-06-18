@@ -728,6 +728,7 @@
     let direction = 'cw';  // cw, ccw
     let centerpiecePercentage = 0;
     let isPaused = false;   // user-controlled Pause/Play (WCAG 2.2.2)
+    const SUPERSAMPLE = 2;  // render the canvas at 2x so CSS rotation samples a crisper texture
 
     // Default Stops Collection
     let colorStops = [
@@ -1058,7 +1059,9 @@
     // Dynamic Hardware-Accelerated Draw Dispatcher
     function drawPlaygroundLoader(canvas, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, isGlow = false) {
       const ctx = canvas.getContext('2d');
-      const dpr = window.devicePixelRatio || 1;
+      // Supersample: back the canvas at 2x the device resolution so the CSS
+      // rotation samples a higher-res texture (kills the edge crawl/shimmer).
+      const dpr = (window.devicePixelRatio || 1) * SUPERSAMPLE;
       const px = Math.round(size * dpr);
       // Only resize when needed — setting canvas.width reallocates the backing
       // store every time, which is the main per-frame cost during morphing.
