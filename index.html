@@ -728,7 +728,8 @@
     let direction = 'cw';  // cw, ccw
     let centerpiecePercentage = 0;
     let isPaused = false;   // user-controlled Pause/Play (WCAG 2.2.2)
-    const SUPERSAMPLE = 2;  // render the canvas at 2x so CSS rotation samples a crisper texture
+    const SUPERSAMPLE = 1;  // (2x was too expensive on large/hue-shift loaders — see perf notes)
+    let hueStops = null;    // when hue-shift is active, the per-frame hue-rotated gradient stops
 
     // Default Stops Collection
     let colorStops = [
@@ -1072,6 +1073,7 @@
       const strokeWidth = thickness;
       const cx = size / 2;
       const cy = size / 2;
+      const activeStops = hueStops || colorStops; // hue-shift swaps in rotated stops per frame
 
       // Draw faint guide track underneath first if enabled
       if (toggleTrack.checked) {
@@ -1129,7 +1131,7 @@
           const angle2 = startRad + sweepRad * ((i + 1.05) / segments);
 
           ctx.lineWidth = tapered ? strokeWidth * (1 - ratio * 0.85) : strokeWidth;
-          let baseColorStr = getColorAtRatio(ratio, colorStops);
+          let baseColorStr = getColorAtRatio(ratio, activeStops);
 
           if (comet && !isGlow) {
             let match = baseColorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
@@ -1167,7 +1169,7 @@
           gradient.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 1)`);
           gradient.addColorStop(1, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 1)`);
         } else {
-          colorStops.forEach(stop => {
+          activeStops.forEach(stop => {
             const rgb = hexToRgba(stop.color, stop.opacity);
             const adjustedPosition = stop.position * (sweepPercent / 100);
             const fadeFactor = comet ? (1 - stop.position) : 1;
@@ -1211,7 +1213,7 @@
         const ty = cy + r_e * Math.sin(endRad) + yOffset;
 
         if (roundHead) {
-          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(0, colorStops);
+          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(0, activeStops);
           ctx.beginPath();
           ctx.arc(hx, hy, strokeWidth / 2, 0, Math.PI * 2);
           ctx.fill();
@@ -1219,7 +1221,7 @@
 
         if (roundTail) {
           const tailOpacity = comet ? 0 : 1;
-          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(sweepPercent / 100, colorStops);
+          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(sweepPercent / 100, activeStops);
           ctx.save();
           ctx.globalAlpha = tailOpacity;
           ctx.beginPath();
@@ -1269,23 +1271,14 @@
         `;
       }
 
-      // Continuous Color cycle implementation
-      let hueAnimation = '';
-      let colorShiftRule = '';
-      if (hueSpeed > 0) {
-        hueAnimation = `
-          @keyframes dynamic-hue {
-            to { filter: hue-rotate(360deg); }
-          }
-        `;
-        colorShiftRule = `, dynamic-hue ${hueSpeed}s linear infinite`;
-      }
-
+      // Hue-shift is NOT done with a CSS hue-rotate filter — animating a filter
+      // over a canvas forces a full main-thread repaint every frame (~1fps on a
+      // Retina-resolution canvas). It's done by cycling the gradient colours in
+      // the canvas instead (see the effects loop), which is composited + cheap.
       injectedSheet.textContent = `
         ${spinKeyframes}
-        ${hueAnimation}
         .spin-target {
-          animation: dynamic-spin ${speed}s ${animFunction} infinite ${colorShiftRule} !important;
+          animation: dynamic-spin ${speed}s ${animFunction} infinite !important;
           animation-play-state: ${isPaused ? 'paused' : 'running'} !important;
         }
       `;
@@ -1327,34 +1320,51 @@
       }
     }
 
-    // Morph animation: continuously expand/contract the active sweep length
-    // (Material Design style) while the container spins via CSS.
-    let morphRafId = null;
-    let morphStart = null;
-    let morphFrame = 0;
-    function morphTick(ts) {
-      if (!toggleMorph.checked || isPaused) { morphRafId = null; morphStart = null; return; }
-      if (morphStart === null) morphStart = ts;
-
-      const speed = parseFloat(sliderSpeed.value) || 1.5;
-      const maxSweep = parseInt(sliderSweep.value);
-      const minSweep = Math.max(8, Math.round(maxSweep * 0.12));
-      const elapsed = (ts - morphStart) / 1000;
-
-      // --- Morph curve: shapes how the arc grows and shrinks each cycle. ---
-      // phase 0..1 over one grow+shrink cycle; eased to 0..1..0 via cosine.
-      const phase = (elapsed / (speed * 2)) % 1;
-      const t = (1 - Math.cos(phase * Math.PI * 2)) / 2;
-      const effectiveSweep = minSweep + (maxSweep - minSweep) * t;
-      // -------------------------------------------------------------------
-
-      drawLoaderFrame(effectiveSweep, (morphFrame++ % 4) === 0); // minis at ~1/4 rate
-      morphRafId = requestAnimationFrame(morphTick);
+    // Hue-rotate a copy of the gradient stops by `deg` degrees (for hue-shift).
+    function rotateStopsHue(stops, deg) {
+      return stops.map(s => {
+        const c = hexToRgba(s.color, 1);
+        const hsv = rgbToHsv(c.r, c.g, c.b);
+        const rgb = hsvToRgb(((hsv.h + deg) % 360 + 360) % 360, hsv.s, hsv.v);
+        return { ...s, color: rgbToHex(rgb.r, rgb.g, rgb.b) };
+      });
     }
-    function startOrStopMorph() {
-      if (toggleMorph.checked && !isPaused && morphRafId === null) {
-        morphStart = null;
-        morphRafId = requestAnimationFrame(morphTick);
+
+    // Effects loop: drives morph (sweep grow/shrink) and hue-shift (colour
+    // cycling) by redrawing the canvas — the container keeps spinning via CSS.
+    // Only runs when one of those effects is on, so the idle case stays free.
+    let effectsRafId = null;
+    let effectsStart = null;
+    let effectsFrame = 0;
+    function effectsActive() { return (toggleMorph.checked || parseFloat(sliderHueSpeed.value) > 0) && !isPaused; }
+    function effectsTick(ts) {
+      if (!effectsActive()) { effectsRafId = null; effectsStart = null; hueStops = null; return; }
+      if (effectsStart === null) effectsStart = ts;
+      const elapsed = (ts - effectsStart) / 1000;
+      const speed = parseFloat(sliderSpeed.value) || 1.5;
+
+      // Morph sweep
+      let sweep = null;
+      if (toggleMorph.checked) {
+        const maxSweep = parseInt(sliderSweep.value);
+        const minSweep = Math.max(8, Math.round(maxSweep * 0.12));
+        const phase = (elapsed / (speed * 2)) % 1;
+        const t = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+        sweep = minSweep + (maxSweep - minSweep) * t;
+      }
+
+      // Hue cycle: rotate the gradient hues by a time-based offset.
+      const hueSpeed = parseFloat(sliderHueSpeed.value);
+      hueStops = hueSpeed > 0 ? rotateStopsHue(colorStops, (elapsed / hueSpeed) * 360) : null;
+
+      drawLoaderFrame(sweep, (effectsFrame++ % 4) === 0); // minis at ~1/4 rate
+      hueStops = null;
+      effectsRafId = requestAnimationFrame(effectsTick);
+    }
+    function startOrStopEffects() {
+      if (effectsActive() && effectsRafId === null) {
+        effectsStart = null;
+        effectsRafId = requestAnimationFrame(effectsTick);
       }
     }
 
@@ -1391,7 +1401,6 @@
       const showTrack = toggleTrack.checked;
       const trackColorHex = colorTrack.value;
       const trackOpacity = parseInt(sliderTrackOpacity.value);
-      const isMorphing = toggleMorph.checked;
 
       // Sync active sliders text metrics
       sizeVal.textContent = `${size}px`;
@@ -1438,12 +1447,12 @@
       loaderContainer.style.width = `${size}px`;
       loaderContainer.style.height = `${size}px`;
 
-      // Draw immediate frame. When morphing is active the RAF loop owns the
-      // canvas (it animates the sweep), so we skip the static frame here.
-      if (!isMorphing) {
+      // Draw an immediate frame. When morph or hue-shift is active the effects
+      // RAF loop owns the canvas (it animates sweep/colour), so skip it here.
+      if (!effectsActive()) {
         drawLoaderFrame();
       }
-      startOrStopMorph();
+      startOrStopEffects();
 
       // Sync Physics Animations (spin speed + color shifting)
       applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed);
