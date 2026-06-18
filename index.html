@@ -618,7 +618,6 @@
     let activeTab = 'css'; // css, canvas, svg
     let direction = 'cw';  // cw, ccw
     let centerpiecePercentage = 0;
-    let globalTime = 0; // Independent high-precision clock for canvas render thread
 
     // Default Stops Collection
     let colorStops = [
@@ -1156,6 +1155,59 @@
       `;
     }
 
+    // Draw both canvas layers (ring + optional glow) for a given sweep.
+    // Reading the inputs here keeps the static draw and the morph loop in sync.
+    function drawLoaderFrame(sweepOverride) {
+      const size = parseInt(sliderSize.value);
+      const thickness = parseInt(sliderThickness.value);
+      const shape = selectShape.value;
+      const isDashed = toggleDashed.checked;
+      const dashCount = parseInt(sliderDashCount.value);
+      const dashGap = parseInt(sliderDashGap.value);
+      const tapered = toggleTaper.checked;
+      const comet = toggleComet.checked;
+      const strokeCap = selectStrokeCap.value;
+      const offsetAngle = parseInt(sliderOffset.value);
+      const roundHead = toggleRoundHead.checked;
+      const roundTail = toggleRoundTail.checked;
+      const sweepPercent = (sweepOverride != null) ? sweepOverride : parseInt(sliderSweep.value);
+
+      drawPlaygroundLoader(loaderRing, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, false);
+      if (toggleGlow.checked) {
+        drawPlaygroundLoader(loaderGlow, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, true);
+      }
+    }
+
+    // Morph animation: continuously expand/contract the active sweep length
+    // (Material Design style) while the container spins via CSS.
+    let morphRafId = null;
+    let morphStart = null;
+    function morphTick(ts) {
+      if (!toggleMorph.checked) { morphRafId = null; morphStart = null; return; }
+      if (morphStart === null) morphStart = ts;
+
+      const speed = parseFloat(sliderSpeed.value) || 1.5;
+      const maxSweep = parseInt(sliderSweep.value);
+      const minSweep = Math.max(8, Math.round(maxSweep * 0.12));
+      const elapsed = (ts - morphStart) / 1000;
+
+      // --- Morph curve: shapes how the arc grows and shrinks each cycle. ---
+      // phase 0..1 over one grow+shrink cycle; eased to 0..1..0 via cosine.
+      const phase = (elapsed / (speed * 2)) % 1;
+      const t = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+      const effectiveSweep = minSweep + (maxSweep - minSweep) * t;
+      // -------------------------------------------------------------------
+
+      drawLoaderFrame(effectiveSweep);
+      morphRafId = requestAnimationFrame(morphTick);
+    }
+    function startOrStopMorph() {
+      if (toggleMorph.checked && morphRafId === null) {
+        morphStart = null;
+        morphRafId = requestAnimationFrame(morphTick);
+      }
+    }
+
     // Live controller pipeline mapping inputs to outputs
     function updateLoader() {
       const size = parseInt(sliderSize.value);
@@ -1236,13 +1288,12 @@
       loaderContainer.style.width = `${size}px`;
       loaderContainer.style.height = `${size}px`;
 
-      // Draw immediate frame (non-morphing baseline)
+      // Draw immediate frame. When morphing is active the RAF loop owns the
+      // canvas (it animates the sweep), so we skip the static frame here.
       if (!isMorphing) {
-        drawPlaygroundLoader(loaderRing, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, false);
-        if (glowOn) {
-          drawPlaygroundLoader(loaderGlow, size, thickness, shape, isDashed, dashCount, dashGap, tapered, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, true);
-        }
+        drawLoaderFrame();
       }
+      startOrStopMorph();
 
       // Sync Physics Animations (spin speed + color shifting)
       applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed);
@@ -1361,17 +1412,19 @@
           css += `  /* NOTE: Complex polygon boundaries, dash gaps, and separate custom end-caps (Head/Tail) are best built using the Canvas JS or SVG Exporter tabs. */\n`;
         }
 
-        // Standard radial mask properties
-        const maskPercent = thickness;
-        const maskOuter = thickness + 0.5;
-        css += `  -webkit-mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n}\n\n`;
+        // Radial mask: punch out the inner disc so only a `thickness`-px ring
+        // remains. `closest-side` makes 100% == the box edge (radius = size/2),
+        // so the transparent hole radius is (size/2 - thickness) as a percent.
+        const holePct = Math.max(0, (1 - (2 * thickness) / size) * 100);
+        const maskImage = `radial-gradient(circle closest-side, transparent ${holePct.toFixed(1)}%, black ${(holePct + 0.5).toFixed(1)}%)`;
+        css += `  -webkit-mask-image: ${maskImage};\n  mask-image: ${maskImage};\n}\n\n`;
 
         if (glowOn) {
           let glowColor = conicGradientString;
           if (toggleGlowOverride.checked) {
             glowColor = colorGlowOverride.value;
           }
-          css += `/* Ambient Glow backdrop */\n.loader-glow {\n  position: absolute;\n  inset: -4px;\n  border-radius: ${shape === 'circle' ? '50%' : '14px'};\n  background: ${glowColor};\n  animation: ${spinAnimations};\n  -webkit-mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  filter: blur(${blur}px);\n  opacity: 0.75;\n  mix-blend-mode: ${blendMode};\n  pointer-events: none;\n}\n\n`;
+          css += `/* Ambient Glow backdrop */\n.loader-glow {\n  position: absolute;\n  inset: -4px;\n  border-radius: ${shape === 'circle' ? '50%' : '14px'};\n  background: ${glowColor};\n  animation: ${spinAnimations};\n  -webkit-mask-image: ${maskImage};\n  mask-image: ${maskImage};\n  filter: blur(${blur}px);\n  opacity: 0.75;\n  mix-blend-mode: ${blendMode};\n  pointer-events: none;\n}\n\n`;
         }
 
         // Add correct dynamic keyframe structure
@@ -1537,8 +1590,37 @@
         js += `    }\n`;
         js += `  };\n`;
 
-        js += `\n  const getRatioColor = (r) => {\n    const stops = ${JSON.stringify(colorStops)};\n    return stops[0].color;\n  };\n\n`;
-        js += `  const fadeColorOpacity = (c, factor) => { return c; };\n\n`;
+        // Embed real gradient sampling so the exported canvas matches the preview.
+        js += `\n  const stops = ${JSON.stringify(colorStops)};\n`;
+        js += `  const hexToRgba = (hex, opacity = 1) => {\n`;
+        js += `    const full = hex.replace(/^#?([a-f\\d])([a-f\\d])([a-f\\d])$/i, (m, r, g, b) => r + r + g + g + b + b);\n`;
+        js += `    const res = /^#?([a-f\\d]{2})([a-f\\d]{2})([a-f\\d]{2})$/i.exec(full);\n`;
+        js += `    return res ? { r: parseInt(res[1], 16), g: parseInt(res[2], 16), b: parseInt(res[3], 16), a: parseFloat(opacity) } : { r: 168, g: 85, b: 247, a: 1 };\n`;
+        js += `  };\n`;
+        js += `  const getRatioColor = (ratio) => {\n`;
+        js += `    if (!stops.length) return 'rgba(168, 85, 247, 1)';\n`;
+        js += `    const sorted = [...stops].sort((a, b) => a.position - b.position);\n`;
+        js += `    const rr = Math.max(0, Math.min(1, ratio));\n`;
+        js += `    const edge = (s) => { const c = hexToRgba(s.color, s.opacity); return 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', ' + c.a + ')'; };\n`;
+        js += `    if (rr <= sorted[0].position) return edge(sorted[0]);\n`;
+        js += `    if (rr >= sorted[sorted.length - 1].position) return edge(sorted[sorted.length - 1]);\n`;
+        js += `    for (let i = 0; i < sorted.length - 1; i++) {\n`;
+        js += `      const s1 = sorted[i], s2 = sorted[i + 1];\n`;
+        js += `      if (rr >= s1.position && rr <= s2.position) {\n`;
+        js += `        const f = (rr - s1.position) / (s2.position - s1.position);\n`;
+        js += `        const c1 = hexToRgba(s1.color, s1.opacity), c2 = hexToRgba(s2.color, s2.opacity);\n`;
+        js += `        const ch = (a, b) => Math.round(a + (b - a) * f);\n`;
+        js += `        return 'rgba(' + ch(c1.r, c2.r) + ', ' + ch(c1.g, c2.g) + ', ' + ch(c1.b, c2.b) + ', ' + (c1.a + (c2.a - c1.a) * f) + ')';\n`;
+        js += `      }\n`;
+        js += `    }\n`;
+        js += `    return 'rgba(168, 85, 247, 1)';\n`;
+        js += `  };\n`;
+        js += `  const fadeColorOpacity = (colorStr, factor) => {\n`;
+        js += `    const m = colorStr.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)(?:,\\s*([\\d.]+))?\\)/);\n`;
+        js += `    if (!m) return colorStr;\n`;
+        js += `    const a = (m[4] !== undefined ? parseFloat(m[4]) : 1) * factor;\n`;
+        js += `    return 'rgba(' + m[1] + ', ' + m[2] + ', ' + m[3] + ', ' + a + ')';\n`;
+        js += `  };\n\n`;
 
         js += `  draw(ring, false);\n  if (glow) draw(glow, true);\n};\nwindow.addEventListener('load', initCanvasLoader);`;
 
@@ -1590,7 +1672,10 @@
           pathD += 'Z';
         }
 
-        const dashArray = isDashed ? `${(Math.PI * radius * 2 * (sweepPercent / 100) / dashCount) - dashGap} ${dashGap}` : 'none';
+        // Match the canvas perimeter model so dash counts agree across exports:
+        // circles use true circumference, polygons use the same size*3 estimate.
+        const dashPerimeter = shape === 'circle' ? (Math.PI * (size - thickness)) : (size * 3);
+        const dashArray = isDashed ? `${Math.max(1, (dashPerimeter * (sweepPercent / 100) / dashCount) - dashGap)} ${dashGap}` : 'none';
 
         let svgHtml = `<!-- Ultra-Lightweight Vector SVG Spinner -->\n<div class="loader-container">\n`;
 
