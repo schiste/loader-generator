@@ -31,7 +31,9 @@ It's a single self-contained HTML file. Either:
   # then visit http://localhost:8000
   ```
 
-No installation or build is required. Tailwind and fonts load from CDNs at runtime.
+No installation is required to use it. Styling is a precompiled Tailwind
+stylesheet (`tailwind.css`); regenerate it with `npm run build:css` after
+changing classes in `index.html`. Fonts load from Google Fonts at runtime.
 
 ## Development
 
@@ -55,9 +57,6 @@ loaders you export stay accessible by default.
 
 ## Roadmap / known limitations
 
-- Tailwind is loaded via the Play CDN (a runtime JIT compiler) — fine for
-  prototyping, but a future revision should ship a compiled stylesheet for
-  production hardening, a strict CSP, and offline use.
 - The renderer and the three code-exporters still re-read state independently;
   unifying them behind one shared config object would prevent preview/export drift.
 

@@ -20,8 +20,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hue-Shift Loader Lab - The Ultimate Workspace</title>
 
-  <!-- Tailwind CSS for sleek UI styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS — precompiled static stylesheet (run `npm run build:css` to
+       regenerate). Replaces the runtime Play CDN, whose JIT compiler + DOM
+       MutationObserver made the whole UI sluggish on every DOM change. -->
+  <link rel="stylesheet" href="tailwind.css">
 
   <!-- Google Fonts for premium typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,12 +44,6 @@
     #loaderContainer {
       transform: translate3d(0, 0, 0);
       will-change: transform;
-    }
-    /* Keep every spinning element on its own GPU layer so rotation is composited,
-       not painted on the main thread each frame. */
-    .spin-target {
-      will-change: transform;
-      backface-visibility: hidden;
     }
 
     /* Custom scrollbars for dashboard panels */
@@ -1235,7 +1231,15 @@
     }
 
     // Dynamic keyframe generator for Physics Easings, Direction & Color Cycling combos
+    let lastPhysicsSig = '';
     function applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed) {
+      // Only rewrite the injected stylesheet when something it depends on
+      // actually changes. Rewriting it forces a full-document style recalc, and
+      // it was running on every control change (every slider drag frame).
+      const sig = [speed, easing, isBreathing, isReversing, direction, isPaused].join('|');
+      if (sig === lastPhysicsSig) return;
+      lastPhysicsSig = sig;
+
       let injectedSheet = document.getElementById('dynamic-physics-sheet');
       if (!injectedSheet) {
         injectedSheet = document.createElement('style');

@@ -11,6 +11,7 @@
   "private": true,
   "scripts": {
     "test": "node --test",
-    "serve": "python3 -m http.server 8000"
+    "serve": "python3 -m http.server 8000",
+    "build:css": "npx --yes tailwindcss@3 -c tailwind.config.js -i src/tailwind.css -o tailwind.css --minify"
   }
 }
