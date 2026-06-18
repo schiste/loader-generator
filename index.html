@@ -859,42 +859,45 @@
     // Dynamic Color Stops Renderer UI
     function renderStops() {
       stopsContainer.innerHTML = '';
+      // Build rows with DOM APIs only (no innerHTML interpolation) so stop
+      // fields can never be parsed as HTML, regardless of their source.
+      const mk = (tag, cls, props) => { const e = document.createElement(tag); if (cls) e.className = cls; if (props) Object.assign(e, props); return e; };
+      const slider = (prop, step, value, id) => {
+        const s = mk('input', 'w-full accent-purple-500 h-1');
+        s.type = 'range'; s.min = '0'; s.max = '1'; s.step = step; s.value = value;
+        s.setAttribute('data-id', id); s.setAttribute('data-prop', prop);
+        return s;
+      };
+      const labelledSlider = (name, pct, slider, extraCls) => {
+        const wrap = mk('div', 'flex-1 flex flex-col gap-0.5 px-1 min-w-[70px]' + (extraCls || ''));
+        const head = mk('div', 'flex justify-between text-[9px] text-slate-500');
+        head.append(mk('span', null, { textContent: name }), mk('span', 'font-mono text-purple-400', { textContent: pct + '%' }));
+        wrap.append(head, slider);
+        return wrap;
+      };
+
       colorStops.forEach((stop, idx) => {
         const isBoundary = idx === 0 || idx === colorStops.length - 1;
-        const stopRow = document.createElement('div');
-        stopRow.className = 'flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800/80';
-        stopRow.innerHTML = `
-          <!-- Stop Indicator -->
-          <div class="flex items-center gap-1.5 min-w-[55px]">
-            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-            <span class="text-[10px] font-bold text-slate-400">Stop ${idx + 1}</span>
-          </div>
-          <!-- Colour swatch (opens the custom picker) -->
-          <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
-            <button type="button" data-swatch="${stop.id}" aria-label="Pick colour for stop ${idx + 1}" class="stop-swatch w-6 h-6 rounded border border-slate-700 cursor-pointer" style="background:${stop.color}"></button>
-            <span class="text-[10px] font-mono text-slate-300 uppercase">${stop.color}</span>
-          </div>
-          <!-- Opacity slider -->
-          <div class="flex-1 flex flex-col gap-0.5 px-1 min-w-[70px]">
-            <div class="flex justify-between text-[9px] text-slate-500">
-              <span>Alpha</span>
-              <span class="font-mono text-purple-400">${Math.round(stop.opacity * 100)}%</span>
-            </div>
-            <input type="range" data-id="${stop.id}" data-prop="opacity" min="0" max="1" step="0.05" value="${stop.opacity}" class="w-full accent-purple-500 h-1">
-          </div>
-          <!-- Position slider -->
-          <div class="flex-1 flex flex-col gap-0.5 px-1 min-w-[70px] ${isBoundary ? 'opacity-30 pointer-events-none' : ''}">
-            <div class="flex justify-between text-[9px] text-slate-500">
-              <span>Position</span>
-              <span class="font-mono text-purple-400">${Math.round(stop.position * 100)}%</span>
-            </div>
-            <input type="range" data-id="${stop.id}" data-prop="position" min="0" max="1" step="0.01" value="${stop.position}" class="w-full accent-purple-500 h-1">
-          </div>
-          <!-- Delete button -->
-          <button data-id="${stop.id}" class="btn-delete-stop text-slate-500 hover:text-red-400 p-1 rounded transition-all text-xs flex items-center justify-center ${colorStops.length <= 2 ? 'opacity-30 pointer-events-none' : ''}">
-            ✕
-          </button>
-        `;
+        const stopRow = mk('div', 'flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800/80');
+
+        const ind = mk('div', 'flex items-center gap-1.5 min-w-[55px]');
+        ind.append(mk('span', 'w-2 h-2 rounded-full bg-purple-500'), mk('span', 'text-[10px] font-bold text-slate-400', { textContent: 'Stop ' + (idx + 1) }));
+
+        const swWrap = mk('div', 'flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800');
+        const swatch = mk('button', 'stop-swatch w-6 h-6 rounded border border-slate-700 cursor-pointer');
+        swatch.type = 'button';
+        swatch.setAttribute('data-swatch', stop.id);
+        swatch.setAttribute('aria-label', 'Pick colour for stop ' + (idx + 1));
+        swatch.style.background = stop.color; // stop.color is validated #rrggbb
+        swWrap.append(swatch, mk('span', 'text-[10px] font-mono text-slate-300 uppercase', { textContent: stop.color }));
+
+        const alpha = labelledSlider('Alpha', Math.round(stop.opacity * 100), slider('opacity', '0.05', stop.opacity, stop.id));
+        const pos = labelledSlider('Position', Math.round(stop.position * 100), slider('position', '0.01', stop.position, stop.id), isBoundary ? ' opacity-30 pointer-events-none' : '');
+
+        const del = mk('button', 'btn-delete-stop text-slate-500 hover:text-red-400 p-1 rounded transition-all text-xs flex items-center justify-center' + (colorStops.length <= 2 ? ' opacity-30 pointer-events-none' : ''), { textContent: '✕' });
+        del.setAttribute('data-id', stop.id);
+
+        stopRow.append(ind, swWrap, alpha, pos, del);
         stopsContainer.appendChild(stopRow);
       });
 
@@ -2167,10 +2170,33 @@
       try { localStorage.setItem(STORE_KEY, JSON.stringify(readConfig())); } catch (e) {}
     }
 
+    // Sanitize config from an untrusted source (URL hash / localStorage) before
+    // it can reach the DOM. Reject the whole config if any stop is malformed so
+    // attacker-controlled strings can never be interpolated anywhere.
+    function coerceConfig(cfg) {
+      if (!cfg || typeof cfg !== 'object') return null;
+      const safe = { v: {}, k: {}, direction: cfg.direction === 'ccw' ? 'ccw' : 'cw', stops: [] };
+      CFG_VALUE_IDS.forEach(id => { if (cfg.v && cfg.v[id] != null) safe.v[id] = String(cfg.v[id]).slice(0, 200); });
+      CFG_CHECK_IDS.forEach(id => { if (cfg.k && typeof cfg.k[id] !== 'undefined') safe.k[id] = !!cfg.k[id]; });
+      if (!Array.isArray(cfg.stops)) return null;
+      for (const s of cfg.stops) {
+        if (!s || typeof s !== 'object') return null;
+        const pos = Number(s.position), op = Number(s.opacity), id = String(s.id);
+        if (!/^#[0-9a-fA-F]{6}$/.test(s.color)) return null;
+        if (!/^[A-Za-z0-9_-]{1,32}$/.test(id)) return null;
+        if (!Number.isFinite(pos) || pos < 0 || pos > 1) return null;
+        if (!Number.isFinite(op) || op < 0 || op > 1) return null;
+        safe.stops.push({ id, color: s.color, opacity: op, position: pos });
+      }
+      if (safe.stops.length < 2) return null;
+      return safe;
+    }
+
     function restoreState() {
       let cfg = null;
       if (location.hash.startsWith('#c=')) cfg = deserialize(location.hash.slice(3));
       if (!cfg) { try { const s = localStorage.getItem(STORE_KEY); if (s) cfg = JSON.parse(s); } catch (e) {} }
+      cfg = coerceConfig(cfg); // never apply unvalidated external data
       if (cfg) { applyConfig(cfg); return true; }
       return false;
     }
