@@ -91,6 +91,26 @@
       background-size: 20px 20px;
       background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
+
+    /* Visible keyboard focus. The toggle switches set peer-focus:outline-none on
+       their visible track, so restore a focus ring on the track for keyboard users. */
+    :focus-visible {
+      outline: 2px solid #a855f7;
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+    input[type="range"]:focus-visible {
+      outline-offset: 4px;
+    }
+    input.peer:focus-visible + div {
+      outline: 2px solid #a855f7 !important;
+      outline-offset: 2px;
+    }
+
+    /* Respect users who ask for reduced motion: never override their setting. */
+    @media (prefers-reduced-motion: reduce) {
+      #loaderContainer { animation: none !important; }
+    }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col overflow-x-hidden selection:bg-purple-500/30">
@@ -137,22 +157,28 @@
 
         <!-- Live Spinner Centerpiece Core -->
         <div class="relative z-10 flex items-center justify-center">
-          <div id="loaderContainer" class="loader-wrapper flex items-center justify-center">
+          <div id="loaderContainer" role="img" aria-label="Animated loading spinner preview" class="loader-wrapper flex items-center justify-center">
             <!-- Glow Canvas Backplate -->
-            <canvas id="loaderGlow" class="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none opacity-75"></canvas>
+            <canvas id="loaderGlow" aria-hidden="true" class="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none opacity-75"></canvas>
             <!-- Sharp Front Ring Canvas -->
-            <canvas id="loaderRing" class="absolute inset-0 w-full h-full"></canvas>
-            <!-- Central counter text element -->
-            <span id="centerpieceText" class="absolute font-semibold text-sm text-slate-200 text-center tracking-tight select-none"></span>
+            <canvas id="loaderRing" aria-hidden="true" class="absolute inset-0 w-full h-full"></canvas>
+            <!-- Central counter text element (decorative; updates too fast to announce) -->
+            <span id="centerpieceText" aria-hidden="true" class="absolute font-semibold text-sm text-slate-200 text-center tracking-tight select-none"></span>
           </div>
         </div>
 
         <div class="absolute bottom-6 left-6 right-6 flex justify-between items-center z-10">
           <span class="text-xs text-slate-500 tracking-wider uppercase font-semibold">Active Live Preview (100% Compatible)</span>
-          <button id="btnReload" class="text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" /></svg>
-            Restart Loop
-          </button>
+          <div class="flex items-center gap-2">
+            <button id="btnPause" aria-pressed="false" class="text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6" /></svg>
+              <span id="pauseLabel">Pause</span>
+            </button>
+            <button id="btnReload" class="text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" /></svg>
+              Restart Loop
+            </button>
+          </div>
         </div>
       </div>
 
@@ -461,10 +487,10 @@
         </div>
       </div>
 
-      <!-- Section 5: Tracing Guide & Path Options -->
+      <!-- Section 4: Tracing Guide & Path Options -->
       <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
         <div>
-          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">5. Tracing Path & Dynamic Morphing</h2>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">4. Tracing Path & Dynamic Morphing</h2>
           <p class="text-[10px] text-slate-400 mt-0.5">Control background guide tracks and configure active path trim morphing.</p>
         </div>
 
@@ -520,10 +546,10 @@
         </div>
       </div>
 
-      <!-- Section 6: Ambient Glows & Backdrop Settings -->
+      <!-- Section 5: Ambient Glows & Backdrop Settings -->
       <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
         <div>
-          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">6. Ambient Glows & Backdrop Settings</h2>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">5. Ambient Glows & Backdrop Settings</h2>
           <p class="text-[10px] text-slate-400 mt-0.5">Overlay custom high-intensity backplates and configure test backdrops.</p>
         </div>
 
@@ -618,6 +644,7 @@
     let activeTab = 'css'; // css, canvas, svg
     let direction = 'cw';  // cw, ccw
     let centerpiecePercentage = 0;
+    let isPaused = false;   // user-controlled Pause/Play (WCAG 2.2.2)
 
     // Default Stops Collection
     let colorStops = [
@@ -1151,6 +1178,10 @@
         ${hueAnimation}
         #loaderContainer {
           animation: dynamic-spin ${speed}s ${animFunction} infinite ${colorShiftRule} !important;
+          animation-play-state: ${isPaused ? 'paused' : 'running'} !important;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          #loaderContainer { animation: none !important; }
         }
       `;
     }
@@ -1183,7 +1214,7 @@
     let morphRafId = null;
     let morphStart = null;
     function morphTick(ts) {
-      if (!toggleMorph.checked) { morphRafId = null; morphStart = null; return; }
+      if (!toggleMorph.checked || isPaused) { morphRafId = null; morphStart = null; return; }
       if (morphStart === null) morphStart = ts;
 
       const speed = parseFloat(sliderSpeed.value) || 1.5;
@@ -1202,7 +1233,7 @@
       morphRafId = requestAnimationFrame(morphTick);
     }
     function startOrStopMorph() {
-      if (toggleMorph.checked && morphRafId === null) {
+      if (toggleMorph.checked && !isPaused && morphRafId === null) {
         morphStart = null;
         morphRafId = requestAnimationFrame(morphTick);
       }
@@ -1373,7 +1404,7 @@
 
       if (activeTab === 'css') {
         // --- Tab 1: Modern CSS Mask code block ---
-        let html = `<!-- Modern Masked CSS Spinner -->\n<div class="loader-container">\n`;
+        let html = `<!-- Modern Masked CSS Spinner -->\n<div class="loader-container" role="status" aria-label="Loading">\n`;
         if (showTrack) {
           html += `  <div class="loader-track"></div>\n`;
         }
@@ -1438,11 +1469,13 @@
           css += `\n\n/* Continuous Hue Rotation */\n@keyframes hue-shift {\n  to { filter: hue-rotate(360deg); }\n}`;
         }
 
+        css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container, .loader-ring, .loader-glow { animation: none !important; }\n}`;
+
         codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>`;
 
       } else if (activeTab === 'canvas') {
         // --- Tab 2: HTML5 Canvas code block ---
-        let html = `<!-- Hardware Accelerated Canvas Loader -->\n<div class="loader-container">\n`;
+        let html = `<!-- Hardware Accelerated Canvas Loader -->\n<div class="loader-container" role="status" aria-label="Loading">\n`;
         if (glowOn) html += `  <canvas id="glowLayer" style="position: absolute; inset: -4px; filter: blur(${blur}px); opacity: 0.75; mix-blend-mode: ${blendMode}; pointer-events: none;"></canvas>\n`;
         html += `  <canvas id="ringLayer" style="position: absolute; inset: 0;"></canvas>\n</div>`;
 
@@ -1624,6 +1657,8 @@
 
         js += `  draw(ring, false);\n  if (glow) draw(glow, true);\n};\nwindow.addEventListener('load', initCanvasLoader);`;
 
+        css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container { animation: none !important; }\n}`;
+
         codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>\n\n<script>\n${js}\n<\/script>`;
 
       } else if (activeTab === 'svg') {
@@ -1677,7 +1712,7 @@
         const dashPerimeter = shape === 'circle' ? (Math.PI * (size - thickness)) : (size * 3);
         const dashArray = isDashed ? `${Math.max(1, (dashPerimeter * (sweepPercent / 100) / dashCount) - dashGap)} ${dashGap}` : 'none';
 
-        let svgHtml = `<!-- Ultra-Lightweight Vector SVG Spinner -->\n<div class="loader-container">\n`;
+        let svgHtml = `<!-- Ultra-Lightweight Vector SVG Spinner -->\n<div class="loader-container" role="status" aria-label="Loading">\n`;
 
         let easingVal = 'linear';
         if (easing === 'ease-in-out') easingVal = 'ease-in-out';
@@ -1768,6 +1803,8 @@
         if (hueSpeed > 0) {
           css += `\n\n@keyframes hue-shift {\n  to { filter: hue-rotate(360deg); }\n}`;
         }
+
+        css += `\n\n/* Respect users who prefer reduced motion */\n@media (prefers-reduced-motion: reduce) {\n  .loader-container { animation: none !important; }\n}`;
 
         codeOutput.textContent = `${svgHtml}\n\n<style>\n${css}\n</style>`;
       }
@@ -1923,10 +1960,20 @@
       updateLoader();
     });
 
+    // Pause / Play control (WCAG 2.2.2 — stop motion that runs longer than 5s)
+    const btnPause = document.getElementById('btnPause');
+    const pauseLabel = document.getElementById('pauseLabel');
+    btnPause.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseLabel.textContent = isPaused ? 'Play' : 'Pause';
+      btnPause.setAttribute('aria-pressed', String(isPaused));
+      updateLoader(); // re-applies play-state and (re)starts the morph loop if needed
+    });
+
     // Central Progress Counter Loop Animation
     const percentRate = 0.35;
     const tickPercentageCounter = () => {
-      if (selectCenterpiece.value === 'percent') {
+      if (!isPaused && selectCenterpiece.value === 'percent') {
         centerpiecePercentage = (centerpiecePercentage + percentRate) % 100;
         centerpieceText.textContent = `${Math.floor(centerpiecePercentage)}%`;
       }
@@ -1939,8 +1986,40 @@
       el.addEventListener('change', updateLoader);
     });
 
+    // Assign accessible names to controls whose visible label sits in a sibling
+    // element (so it isn't programmatically associated). Keeps the markup intact.
+    function labelControls() {
+      const labels = {
+        sliderSize: 'Overall size', sliderThickness: 'Stroke thickness',
+        selectShape: 'Outer border shape', sliderSweep: 'Sweep angle coverage',
+        selectStrokeCap: 'Stroke cap ends', toggleDashed: 'Segmented / dashed ring',
+        sliderDashCount: 'Segment count', sliderDashGap: 'Dash gap size',
+        toggleTaper: 'Tapered tail', toggleComet: 'Comet fade',
+        toggleRoundHead: 'Round head cap', toggleRoundTail: 'Round tail cap',
+        sliderSpeed: 'Spin speed', selectEasing: 'Easing physics',
+        sliderHueSpeed: 'Hue-shift color cycle speed', sliderOffset: 'Gradient start angle offset',
+        toggleBreathing: 'Breathing pulse', toggleReversing: 'Reversing sweep',
+        toggleMirror: 'Mirror reflection', toggleTrack: 'Show guide track',
+        sliderTrackOpacity: 'Track opacity', colorTrack: 'Track color',
+        toggleMorph: 'Dynamic trim path morphing', toggleGlow: 'Enable glow layer',
+        sliderBlur: 'Glow spread', selectBlendMode: 'Glow blend mode',
+        toggleGlowOverride: 'Glow color override', colorGlowOverride: 'Glow override color',
+        colorCustomBg: 'Custom backdrop color', selectCenterpiece: 'Central info overlay',
+        inputCenterText: 'Custom center text',
+        btnDirCw: 'Clockwise direction', btnDirCcw: 'Reversed direction',
+        btnBgDark: 'Dark backdrop', btnBgLight: 'Light backdrop',
+        btnBgGrid: 'Grid backdrop', btnBgCustom: 'Custom backdrop',
+        btnReload: 'Restart animation loop', btnAddStop: 'Add custom color stop'
+      };
+      Object.entries(labels).forEach(([id, name]) => {
+        const el = document.getElementById(id);
+        if (el && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', name);
+      });
+    }
+
     // Setup Startup Lifecycle
     function init() {
+      labelControls();
       renderStops();
       updateLoader();
       requestAnimationFrame(tickPercentageCounter);
