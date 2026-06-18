@@ -26,3 +26,6 @@ __pycache__/
 .idea/
 .vscode/
 *.swp
+
+# Local agent settings
+.claude/
