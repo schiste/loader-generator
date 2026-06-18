@@ -1,0 +1,16 @@
+{
+  "name": "loader-generator",
+  "version": "0.1.0",
+  "description": "Hue-Shift Loader Lab — a browser-based visual generator for animated loading spinners with CSS / Canvas / SVG export.",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/schiste/loader-generator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/schiste/loader-generator.git"
+  },
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "serve": "python3 -m http.server 8000"
+  }
+}

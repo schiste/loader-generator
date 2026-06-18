@@ -33,13 +33,33 @@ It's a single self-contained HTML file. Either:
 
 No installation or build is required. Tailwind and fonts load from CDNs at runtime.
 
+## Development
+
+The pure math helpers are unit tested (the tests extract the real functions from
+`index.html`, so they cover exactly the shipped code):
+
+```bash
+npm test        # node --test  — no dependencies to install
+npm run serve   # serve locally on http://localhost:8000
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for more. CI runs the tests and a parse
+check on every push/PR; `main` auto-deploys to GitHub Pages.
+
+## Accessibility
+
+The app honors `prefers-reduced-motion`, ships a Pause/Play control for the
+preview, and labels its controls for assistive tech. The generated CSS/Canvas/SVG
+snippets also include a `prefers-reduced-motion` guard and `role="status"`, so the
+loaders you export stay accessible by default.
+
 ## Roadmap / known limitations
 
 - Tailwind is loaded via the Play CDN (a runtime JIT compiler) — fine for
   prototyping, but a future revision should ship a compiled stylesheet for
-  production hardening and offline use.
-- Clipboard copy uses the legacy `document.execCommand('copy')` path; migrating to
-  the async Clipboard API is a candidate improvement.
+  production hardening, a strict CSP, and offline use.
+- The renderer and the three code-exporters still re-read state independently;
+  unifying them behind one shared config object would prevent preview/export drift.
 
 ## License
 
