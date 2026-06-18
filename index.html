@@ -164,6 +164,10 @@
         <!-- Live Spinner Centerpiece Core -->
         <div class="relative z-10 flex items-center justify-center">
           <div id="loaderContainer" role="img" aria-label="Animated loading spinner preview" class="loader-wrapper flex items-center justify-center">
+            <!-- Native (CSS) render path: conic-gradient + mask. Used for the circle; -->
+            <!-- hidden when the canvas path handles the shape. -->
+            <div id="loaderGlowEl" aria-hidden="true" class="absolute inset-0 pointer-events-none hidden"></div>
+            <div id="loaderRingEl" aria-hidden="true" class="absolute inset-0 hidden"></div>
             <!-- Glow Canvas Backplate -->
             <canvas id="loaderGlow" aria-hidden="true" class="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none opacity-75"></canvas>
             <!-- Sharp Front Ring Canvas -->
@@ -739,6 +743,8 @@
     const loaderContainer = document.getElementById('loaderContainer');
     const loaderRing = document.getElementById('loaderRing');
     const loaderGlow = document.getElementById('loaderGlow');
+    const loaderRingEl = document.getElementById('loaderRingEl');   // native (CSS) ring
+    const loaderGlowEl = document.getElementById('loaderGlowEl');   // native (CSS) glow
     const centerpieceText = document.getElementById('centerpieceText');
     const previewSandbox = document.getElementById('previewSandbox');
     const backdropGrid = document.getElementById('backdropGrid');
@@ -1373,6 +1379,59 @@
       }
     }
 
+    // ---- Native (CSS) ring renderer ----
+    // Builds the same conic-gradient + radial mask the CSS tab exports, so the
+    // circle preview is a real composited element (no canvas) — and ultimately
+    // one renderer feeds both preview and export.
+    function ringConicGradient(offsetAngle, sweepPercent, comet, stops) {
+      let g = `conic-gradient(from ${offsetAngle}deg`;
+      stops.forEach(stop => {
+        const scaledPosition = Math.round(stop.position * sweepPercent);
+        let stopColor = stop.color;
+        if (comet) {
+          const rgb = hexToRgba(stop.color, stop.opacity * (1 - stop.position));
+          stopColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a.toFixed(2)})`;
+        }
+        g += `, ${stopColor} ${scaledPosition}%`;
+      });
+      if (sweepPercent < 100) g += `, transparent ${sweepPercent}%, transparent 100%`;
+      return g + ')';
+    }
+    function ringMask(size, thickness) {
+      // Explicit pixel radii — a band from (r-thickness) to r, transparent inside
+      // and outside. border-radius can't help here (it's ignored once a mask is
+      // applied), so the mask must cut both edges itself.
+      const outerR = size / 2;
+      const innerR = Math.max(0, size / 2 - thickness);
+      return `radial-gradient(circle, transparent ${innerR}px, black ${(innerR + 0.5).toFixed(1)}px, black ${outerR}px, transparent ${(outerR + 0.5).toFixed(1)}px)`;
+    }
+    // Conditions the native circle path can currently express (the rest still
+    // uses canvas; taper/dashes/caps/hue/morph come in the next steps).
+    function canRenderNative(shape, tapered, isDashed, hueSpeed) {
+      return shape === 'circle' && !tapered && !isDashed && hueSpeed === 0 && !toggleMorph.checked;
+    }
+    function renderNativeRing(size, thickness, offsetAngle, sweepPercent, comet, glowOn, blur, blendMode) {
+      const grad = ringConicGradient(offsetAngle, sweepPercent, comet, colorStops);
+      const mask = ringMask(size, thickness);
+      loaderRingEl.style.borderRadius = '50%';   // clips the square to a circle; the mask makes the hole
+      loaderRingEl.style.background = grad;
+      loaderRingEl.style.webkitMaskImage = mask;
+      loaderRingEl.style.maskImage = mask;
+      loaderRingEl.classList.remove('hidden');
+      if (glowOn) {
+        loaderGlowEl.style.borderRadius = '50%';
+        loaderGlowEl.style.background = grad;
+        loaderGlowEl.style.webkitMaskImage = mask;
+        loaderGlowEl.style.maskImage = mask;
+        loaderGlowEl.style.filter = `blur(${blur}px)`;
+        loaderGlowEl.style.opacity = '0.75';
+        loaderGlowEl.style.mixBlendMode = blendMode;
+        loaderGlowEl.classList.remove('hidden');
+      } else {
+        loaderGlowEl.classList.add('hidden');
+      }
+    }
+
     // Live controller pipeline mapping inputs to outputs
     function updateLoader() {
       const size = parseInt(sliderSize.value);
@@ -1441,23 +1500,32 @@
 
       if (glowOn) {
         glowSubcontrols.classList.remove('opacity-40', 'pointer-events-none');
-        loaderGlow.style.opacity = '0.75';
-        loaderGlow.style.mixBlendMode = blendMode;
       } else {
         glowSubcontrols.classList.add('opacity-40', 'pointer-events-none');
-        loaderGlow.style.opacity = '0';
       }
 
-      // Update Live Canvas layers sizes
+      // Container size drives both render paths.
       loaderContainer.style.width = `${size}px`;
       loaderContainer.style.height = `${size}px`;
 
-      // Draw an immediate frame. When morph or hue-shift is active the effects
-      // RAF loop owns the canvas (it animates sweep/colour), so skip it here.
-      if (!effectsActive()) {
-        drawLoaderFrame();
+      // Choose render path: native CSS element (smooth, composited) when the
+      // config allows it, else the canvas.
+      const useNative = canRenderNative(shape, tapered, isDashed, hueSpeed);
+      if (useNative) {
+        loaderRing.classList.add('hidden');
+        loaderGlow.classList.add('hidden');
+        renderNativeRing(size, thickness, offsetAngle, sweepPercent, comet, glowOn, blur, blendMode);
+        startOrStopEffects(); // no-op (effects inactive in native conditions), keeps loop tidy
+      } else {
+        loaderRingEl.classList.add('hidden');
+        loaderGlowEl.classList.add('hidden');
+        loaderRing.classList.remove('hidden');
+        loaderGlow.style.opacity = glowOn ? '0.75' : '0';
+        loaderGlow.style.mixBlendMode = blendMode;
+        loaderGlow.classList.remove('hidden');
+        if (!effectsActive()) drawLoaderFrame();
+        startOrStopEffects();
       }
-      startOrStopEffects();
 
       // Sync Physics Animations (spin speed + color shifting)
       applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed);
