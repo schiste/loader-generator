@@ -106,11 +106,6 @@
       outline: 2px solid #a855f7 !important;
       outline-offset: 2px;
     }
-
-    /* Respect users who ask for reduced motion: never override their setting. */
-    @media (prefers-reduced-motion: reduce) {
-      #loaderContainer { animation: none !important; }
-    }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col selection:bg-purple-500/30">
@@ -1190,9 +1185,6 @@
           animation: dynamic-spin ${speed}s ${animFunction} infinite ${colorShiftRule} !important;
           animation-play-state: ${isPaused ? 'paused' : 'running'} !important;
         }
-        @media (prefers-reduced-motion: reduce) {
-          #loaderContainer { animation: none !important; }
-        }
       `;
     }
 
@@ -2050,6 +2042,18 @@
     // Setup Startup Lifecycle
     function init() {
       labelControls();
+
+      // Respect "reduce motion" by starting paused — but the Play button is a
+      // real escape hatch (it overrides the preference when the user opts in).
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        isPaused = true;
+        const pl = document.getElementById('pauseLabel');
+        const bp = document.getElementById('btnPause');
+        if (pl) pl.textContent = 'Play';
+        if (bp) { bp.setAttribute('aria-pressed', 'true'); bp.title = 'Reduce-motion is on — click to play anyway'; }
+      }
+
       renderStops();
       updateLoader();
       requestAnimationFrame(tickPercentageCounter);
