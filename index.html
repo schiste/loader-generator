@@ -174,6 +174,22 @@
         </div>
       </div>
 
+      <!-- Quick actions toolbar -->
+      <div class="flex items-center gap-2">
+        <button id="btnRandomize" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium px-3 py-2 rounded-xl transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h4l12 12h4M4 20h4L20 8h0M16 4h4v4M16 20h4v-4"/></svg>
+          Randomize
+        </button>
+        <button id="btnReset" class="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-[11px] font-medium px-3 py-2 rounded-xl transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"/></svg>
+          Reset
+        </button>
+        <button id="btnShare" class="flex-1 flex items-center justify-center gap-1.5 bg-purple-600/90 hover:bg-purple-500 border border-purple-500/40 text-white text-[11px] font-medium px-3 py-2 rounded-xl transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          Share
+        </button>
+      </div>
+
       <!-- Generated Code Export Console -->
       <div class="bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden flex flex-col shadow-xl">
         <div class="flex flex-wrap justify-between items-center bg-slate-950 px-5 py-2 border-b border-slate-900">
@@ -1349,6 +1365,7 @@
       }
 
       generateExportTemplates();
+      saveState();
     }
 
     // Generator Export Tab Handler
@@ -1818,19 +1835,15 @@
     }
 
     // Direction controllers
-    btnDirCw.addEventListener('click', () => {
-      direction = 'cw';
-      btnDirCw.className = 'text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all';
-      btnDirCcw.className = 'text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all';
-      updateLoader();
-    });
-
-    btnDirCcw.addEventListener('click', () => {
-      direction = 'ccw';
-      btnDirCcw.className = 'text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all';
-      btnDirCw.className = 'text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all';
-      updateLoader();
-    });
+    function setDirection(dir) {
+      direction = (dir === 'ccw') ? 'ccw' : 'cw';
+      const active = 'text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      const idle = 'text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      btnDirCw.className = direction === 'cw' ? active : idle;
+      btnDirCcw.className = direction === 'ccw' ? active : idle;
+    }
+    btnDirCw.addEventListener('click', () => { setDirection('cw'); updateLoader(); });
+    btnDirCcw.addEventListener('click', () => { setDirection('ccw'); updateLoader(); });
 
     // Backdrop Simulator mappings
     const resetBgButtons = () => {
@@ -2044,9 +2057,105 @@
       });
     }
 
+    // ---- Config: a single source of truth for the whole loader design. ----
+    // Read/apply the full state so persistence, sharing, reset and randomize
+    // all go through one path (and adding a control here can't be forgotten).
+    const CFG_VALUE_IDS = ['sliderSize','sliderThickness','selectShape','sliderSweep','selectStrokeCap','sliderDashCount','sliderDashGap','sliderSpeed','selectEasing','sliderHueSpeed','sliderOffset','sliderTrackOpacity','colorTrack','sliderBlur','selectBlendMode','colorGlowOverride','colorCustomBg','selectCenterpiece','inputCenterText'];
+    const CFG_CHECK_IDS = ['toggleDashed','toggleTaper','toggleComet','toggleRoundHead','toggleRoundTail','toggleBreathing','toggleReversing','toggleMirror','toggleTrack','toggleMorph','toggleGlow','toggleGlowOverride'];
+    const STORE_KEY = 'hueshift.config.v1';
+    let DEFAULTS = null;
+    let configReady = false;
+
+    function readConfig() {
+      const c = { v: {}, k: {}, direction, stops: colorStops.map(s => ({ ...s })) };
+      CFG_VALUE_IDS.forEach(id => { const el = document.getElementById(id); if (el) c.v[id] = el.value; });
+      CFG_CHECK_IDS.forEach(id => { const el = document.getElementById(id); if (el) c.k[id] = el.checked; });
+      return c;
+    }
+
+    function applyConfig(cfg) {
+      if (!cfg) return;
+      CFG_VALUE_IDS.forEach(id => { if (cfg.v && cfg.v[id] != null) { const el = document.getElementById(id); if (el) el.value = cfg.v[id]; } });
+      CFG_CHECK_IDS.forEach(id => { if (cfg.k && cfg.k[id] != null) { const el = document.getElementById(id); if (el) el.checked = cfg.k[id]; } });
+      if (Array.isArray(cfg.stops) && cfg.stops.length >= 2) colorStops = cfg.stops.map(s => ({ ...s }));
+      setDirection(cfg.direction);
+      renderStops();
+      updateLoader();
+    }
+
+    function serialize(cfg) { return encodeURIComponent(JSON.stringify(cfg)); }
+    function deserialize(s) { try { return JSON.parse(decodeURIComponent(s)); } catch (e) { return null; } }
+
+    function saveState() {
+      if (!configReady) return;
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(readConfig())); } catch (e) {}
+    }
+
+    function restoreState() {
+      let cfg = null;
+      if (location.hash.startsWith('#c=')) cfg = deserialize(location.hash.slice(3));
+      if (!cfg) { try { const s = localStorage.getItem(STORE_KEY); if (s) cfg = JSON.parse(s); } catch (e) {} }
+      if (cfg) { applyConfig(cfg); return true; }
+      return false;
+    }
+
+    function resetConfig() {
+      applyConfig(DEFAULTS);
+      try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    function randomConfig() {
+      const cfg = readConfig();
+      const pick = (a) => a[Math.floor(Math.random() * a.length)];
+      const rnd = (min, max, step) => String(Math.round((min + Math.random() * (max - min)) / step) * step);
+      cfg.v.selectShape = pick(['circle', 'squircle', 'hexagon', 'triangle']);
+      cfg.v.sliderSize = rnd(90, 220, 5);
+      cfg.v.sliderThickness = rnd(6, 28, 1);
+      cfg.v.sliderSweep = rnd(35, 100, 5);
+      cfg.v.selectStrokeCap = pick(['round', 'butt']);
+      cfg.v.sliderSpeed = (Math.round((0.6 + Math.random() * 2.4) * 10) / 10).toFixed(1);
+      cfg.v.selectEasing = pick(['linear', 'ease-in-out', 'steps', 'bounce']);
+      cfg.v.sliderOffset = rnd(0, 360, 5);
+      cfg.v.sliderHueSpeed = pick(['0', '0', '0', '2', '4']);
+      cfg.k.toggleComet = Math.random() < 0.6;
+      cfg.k.toggleTaper = Math.random() < 0.3;
+      cfg.k.toggleGlow = Math.random() < 0.7;
+      cfg.k.toggleBreathing = Math.random() < 0.3;
+      cfg.k.toggleDashed = Math.random() < 0.2;
+      cfg.direction = pick(['cw', 'ccw']);
+      const palette = ['#a855f7', '#22c55e', '#ec4899', '#3b82f6', '#f97316', '#ef4444', '#06b6d4', '#eab308', '#8b5cf6', '#10b981'];
+      const n = 2 + Math.floor(Math.random() * 2); // 2 or 3 colours
+      const stops = [];
+      for (let i = 0; i <= n; i++) {
+        const color = (i === n) ? stops[0].color : pick(palette); // loop back for a seamless ring
+        stops.push({ id: String(i + 1), color, opacity: 1, position: Math.round((i / n) * 100) / 100 });
+      }
+      cfg.stops = stops;
+      return cfg;
+    }
+
+    function shareURL() { return location.origin + location.pathname + '#c=' + serialize(readConfig()); }
+
+    document.getElementById('btnReset').addEventListener('click', resetConfig);
+    document.getElementById('btnRandomize').addEventListener('click', () => applyConfig(randomConfig()));
+    document.getElementById('btnShare').addEventListener('click', async () => {
+      const url = shareURL();
+      try {
+        if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(url);
+        else legacyCopy(url);
+        history.replaceState(null, '', '#c=' + serialize(readConfig()));
+        showToast('Shareable link copied to clipboard!');
+      } catch (e) {
+        const ok = legacyCopy(url);
+        showToast(ok ? 'Shareable link copied to clipboard!' : 'Could not copy — copy from the address bar.', ok);
+      }
+    });
+
     // Setup Startup Lifecycle
     function init() {
       labelControls();
+      DEFAULTS = readConfig(); // snapshot the pristine HTML defaults for Reset
 
       // Respect "reduce motion" by starting paused — but the Play button is a
       // real escape hatch (it overrides the preference when the user opts in).
@@ -2059,8 +2168,11 @@
         if (bp) { bp.setAttribute('aria-pressed', 'true'); bp.title = 'Reduce-motion is on — click to play anyway'; }
       }
 
-      renderStops();
-      updateLoader();
+      // Restore a shared (#c=) or previously-saved design; else render defaults.
+      const restored = restoreState();
+      if (!restored) { renderStops(); updateLoader(); }
+
+      configReady = true; // start persisting only after initial render settles
       requestAnimationFrame(tickPercentageCounter);
     }
 
