@@ -992,8 +992,12 @@
 
       ctx.save(); // Save 1: Core state before mirror & wedge clip
 
-      // Inverted Mirror Logic: Flipped horizontally by default (unchecked) to show the preferred layout, unmirrored when checked.
-      if (!toggleMirror.checked) {
+      // Horizontal flip = the mirror toggle XOR the spin direction. Reversing the
+      // spin is compensated by mirroring the drawing, so colour stop 1 stays the
+      // "head" of the sweep whether spinning clockwise or reversed.
+      // (The base flip is inverted: unchecked mirror flips by default.)
+      const flipH = (!toggleMirror.checked) !== (direction === 'ccw');
+      if (flipH) {
         ctx.translate(size, 0);
         ctx.scale(-1, 1);
       }
@@ -1416,7 +1420,7 @@
         html += `  <div class="loader-ring"></div>\n</div>`;
 
         // Apply Mirror Reflection onto parent container to prevent animation transform overrides!
-        const mirrorCSSRule = !toggleMirror.checked ? '  transform: scaleX(-1);\n' : '';
+        const mirrorCSSRule = ((!toggleMirror.checked) !== (direction === 'ccw')) ? '  transform: scaleX(-1);\n' : '';
 
         let css = `/* Core Container */\n.loader-container {\n  position: relative;\n  width: ${size}px;\n  height: ${size}px;\n${mirrorCSSRule}}\n\n`;
 
@@ -1509,7 +1513,8 @@
         let js = `const initCanvasLoader = () => {\n  const ring = document.getElementById('ringLayer');\n  const glow = document.getElementById('glowLayer');\n  const size = ${size};\n\n  const draw = (canvas, isGlow) => {\n    const ctx = canvas.getContext('2d');\n    canvas.width = size;\n    canvas.height = size;\n    ctx.clearRect(0, 0, size, size);\n\n    const cx = size / 2;\n    const cy = size / 2;\n    const thickness = ${thickness};\n\n    ctx.save();\n`;
 
         // Apply Inverted Mirror Transformation inside Canvas script export
-        if (!toggleMirror.checked) {
+        // (mirror toggle XOR reversed spin keeps stop 1 as the head).
+        if ((!toggleMirror.checked) !== (direction === 'ccw')) {
           js += `    // Apply Mirror Reflection coordinate transformation\n    ctx.translate(size, 0);\n    ctx.scale(-1, 1);\n`;
         }
 
@@ -1727,7 +1732,7 @@
         }
 
         // Apply Mirror Reflection styling with correct origin directly on SVG root container!
-        const mirrorSVGStyles = !toggleMirror.checked ? 'transform: scaleX(-1); transform-origin: center;' : '';
+        const mirrorSVGStyles = ((!toggleMirror.checked) !== (direction === 'ccw')) ? 'transform: scaleX(-1); transform-origin: center;' : '';
 
         svgHtml += `  <svg class="loader-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none" xmlns="http://www.w3.org/2000/svg" style="${mirrorSVGStyles}">\n`;
         svgHtml += `    <defs>\n`;
