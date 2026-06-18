@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<!--
+  loader-generator — Hue-Shift Loader Lab
+  Copyright (C) 2026 Christophe Henner
+
+  This program is free software: you can redistribute it and/or modify it under
+  the terms of the GNU Affero General Public License as published by the Free
+  Software Foundation, either version 3 of the License, or (at your option) any
+  later version.
+
+  This program is distributed WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Affero General Public License for more details: https://www.gnu.org/licenses/
+
+  Source: https://github.com/schiste/loader-generator
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hue-Shift Loader Lab - The Ultimate Workspace</title>
+
+  <!-- Tailwind CSS for sleek UI styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #05070f;
+    }
+
+    pre, code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Hardware-Accelerated Rotations & Breathing Combos generated dynamically via JS */
+    #loaderContainer {
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+    }
+
+    /* Custom scrollbars for dashboard panels */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Standardized range input aesthetics across browsers */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: #1e293b;
+      border-radius: 9999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #a855f7;
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.1s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #c084fc;
+    }
+
+    /* Checkerboard backdrop styling helper */
+    .bg-checkerboard {
+      background-image: linear-gradient(45deg, #161b26 25%, transparent 25%),
+                        linear-gradient(-45deg, #161b26 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #161b26 75%),
+                        linear-gradient(-45deg, transparent 75%, #161b26 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col overflow-x-hidden selection:bg-purple-500/30">
+
+  <!-- Header -->
+  <header class="border-b border-slate-900 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-600 via-pink-500 to-green-500 p-[2px] flex items-center justify-center shadow-lg shadow-purple-500/10">
+          <div class="h-full w-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <span class="text-xs font-bold bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent">⬤</span>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight tracking-tight bg-gradient-to-r from-slate-100 via-slate-100 to-purple-400 bg-clip-text text-transparent">Hue-Shift Loader Lab</h1>
+          <p class="text-[11px] text-slate-400">The Ultimate Pro Vector & Conic Generator Workspace</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          Active Tracing Path
+        </span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          Trim Path Morphing
+        </span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+          Wedge Clipping
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+    <!-- LEFT PANEL: Dynamic Live Loader Preview & Exporter (Sticky Column) -->
+    <div class="lg:col-span-5 lg:sticky lg:top-24 flex flex-col gap-6 self-start">
+
+      <!-- Interactive Grid Sandbox Viewport -->
+      <div id="previewSandbox" class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800/80 rounded-2xl p-8 flex flex-col items-center justify-center relative min-h-[350px] shadow-2xl overflow-hidden group">
+
+        <!-- Interactive grid layout backdrop -->
+        <div id="backdropGrid" class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b1a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b1a_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+        <div id="backdropCustomColor" class="absolute inset-0 opacity-0 transition-opacity duration-300"></div>
+
+        <!-- Live Spinner Centerpiece Core -->
+        <div class="relative z-10 flex items-center justify-center">
+          <div id="loaderContainer" class="loader-wrapper flex items-center justify-center">
+            <!-- Glow Canvas Backplate -->
+            <canvas id="loaderGlow" class="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none opacity-75"></canvas>
+            <!-- Sharp Front Ring Canvas -->
+            <canvas id="loaderRing" class="absolute inset-0 w-full h-full"></canvas>
+            <!-- Central counter text element -->
+            <span id="centerpieceText" class="absolute font-semibold text-sm text-slate-200 text-center tracking-tight select-none"></span>
+          </div>
+        </div>
+
+        <div class="absolute bottom-6 left-6 right-6 flex justify-between items-center z-10">
+          <span class="text-xs text-slate-500 tracking-wider uppercase font-semibold">Active Live Preview (100% Compatible)</span>
+          <button id="btnReload" class="text-xs text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5" /></svg>
+            Restart Loop
+          </button>
+        </div>
+      </div>
+
+      <!-- Generated Code Export Console -->
+      <div class="bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden flex flex-col shadow-xl">
+        <div class="flex flex-wrap justify-between items-center bg-slate-950 px-5 py-2 border-b border-slate-900">
+          <div class="flex gap-1">
+            <button id="tabCssBtn" class="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-purple-400 border-b-2 border-purple-500 transition-all">
+              CSS Mask
+            </button>
+            <button id="tabCanvasBtn" class="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all">
+              Canvas JS
+            </button>
+            <button id="tabSvgBtn" class="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all">
+              SVG Vector
+            </button>
+          </div>
+          <button id="btnCopy" class="bg-purple-600 hover:bg-purple-500 text-white font-medium text-[11px] px-3.5 py-1.5 rounded-lg transition-all shadow-lg shadow-purple-600/10 active:scale-95 flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+            Copy Code
+          </button>
+        </div>
+        <div class="relative flex-1">
+          <pre class="p-5 text-[11px] text-slate-300 overflow-x-auto max-h-[260px] bg-slate-950/40"><code id="codeOutput" class="language-html">Loading generator configurations...</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Settings & Property Customizer Panels (7 columns) -->
+    <div class="lg:col-span-7 flex flex-col gap-6">
+
+      <!-- Section 1: Sizing, Silhouette & Geometry -->
+      <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-5">
+        <div>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">1. Geometry & Silhouette</h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">Control outer boundary shapes, stroke diameters, and segment patterns.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Size & Thickness sliders -->
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-300">Overall Size</span>
+                <span id="sizeVal" class="text-purple-400 font-medium font-mono">140px</span>
+              </div>
+              <input id="sliderSize" type="range" min="50" max="250" step="5" value="140" class="w-full accent-purple-500 h-1.5">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-300">Stroke Thickness</span>
+                <span id="thicknessVal" class="text-purple-400 font-medium font-mono">12px</span>
+              </div>
+              <input id="sliderThickness" type="range" min="3" max="40" step="1" value="12" class="w-full accent-purple-500 h-1.5">
+            </div>
+          </div>
+
+          <!-- Shape Select & Segment Mode -->
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-semibold text-slate-300">Outer Border Shape</span>
+              <select id="selectShape" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-purple-500 cursor-pointer">
+                <option value="circle">Perfect Circle</option>
+                <option value="squircle">Squircle (Rounded Box)</option>
+                <option value="hexagon">Futuristic Hexagon</option>
+                <option value="triangle">Play-Button Triangle</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-300">Sweep Angle (Coverage)</span>
+                <span id="sweepVal" class="text-purple-400 font-medium font-mono">100%</span>
+              </div>
+              <input id="sliderSweep" type="range" min="10" max="100" step="5" value="100" class="w-full accent-purple-500 h-1.5">
+              <span class="text-[9px] text-slate-500">Limits rendering area (e.g., 50% = 180° Half Moon)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-900 flex flex-col gap-1.5">
+          <span class="text-xs font-semibold text-slate-300">Stroke Cap Ends (Global)</span>
+          <select id="selectStrokeCap" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-purple-500 cursor-pointer">
+            <option value="round">Round Ends (Premium)</option>
+            <option value="butt">Flat Butt Ends (Technical)</option>
+          </select>
+        </div>
+
+        <!-- Segment / Dash array Controls -->
+        <div class="pt-4 border-t border-slate-900 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Segmented / Dashed Ring</span>
+              <span class="text-[10px] text-slate-500">Divides the continuous ring into clean fragments</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleDashed" type="checkbox" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div id="dashedControls" class="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-40 pointer-events-none transition-all duration-300">
+            <div class="flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Segment Count</span>
+                <span id="dashCountVal" class="text-purple-400 font-medium font-mono">12</span>
+              </div>
+              <input id="sliderDashCount" type="range" min="3" max="48" step="1" value="12" class="w-full accent-purple-500 h-1.5">
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-400">Dash Gap Size</span>
+                <span id="dashGapVal" class="text-purple-400 font-medium font-mono">6px</span>
+              </div>
+              <input id="sliderDashGap" type="range" min="2" max="30" step="1" value="6" class="w-full accent-purple-500 h-1.5">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Colors, Fades & Caps Customizer -->
+      <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">2. Colors, Fades & Caps</h2>
+            <p class="text-[10px] text-slate-400 mt-0.5">Define your transition spectrum, fades, and cap modifications.</p>
+          </div>
+          <button id="btnAddStop" class="bg-slate-900 hover:bg-slate-800 text-[10px] font-bold border border-slate-800 text-purple-400 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+            <span>+</span> Add Custom Stop
+          </button>
+        </div>
+
+        <!-- Dynamic Color Stops Wrapper -->
+        <div id="stopsContainer" class="flex flex-col gap-3 max-h-[190px] overflow-y-auto pr-2">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <!-- Predefined Gradient Schemes -->
+        <div class="pt-3 border-t border-slate-900 flex flex-col gap-2">
+          <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Quick Gradient Presets</span>
+          <div class="flex flex-wrap gap-2">
+            <button data-preset="purple-green" class="preset-btn px-2.5 py-1.5 rounded-lg border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/10 text-[11px] text-purple-300 transition-all flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#a855f7] to-[#22c55e]"></span>
+              Purple-Green (2-Stop)
+            </button>
+            <button data-preset="rainbow-tri" class="preset-btn px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-400 transition-all flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#a855f7] via-[#22c55e] to-[#ec4899]"></span>
+              Rainbow (3-Stop)
+            </button>
+            <button data-preset="neon-cyber" class="preset-btn px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-400 transition-all flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#00f2fe] to-[#4facfe]"></span>
+              Cyber Hologram
+            </button>
+            <button data-preset="fire-sweep" class="preset-btn px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-400 transition-all flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-[#f97316] via-[#ef4444] to-[#e11d48]"></span>
+              Solar Flare
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-900 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex items-center justify-between bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Tapered Tail</span>
+              <span class="text-[9px] text-slate-500">Gradually thins out sweep tail</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleTaper" type="checkbox" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Comet Fade</span>
+              <span class="text-[9px] text-slate-500">Smooth opacity fade to tail</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleComet" type="checkbox" checked class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Dynamic Partial Sweep Cap Customizer Toggles -->
+        <div id="partialSweepCapsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 transition-all duration-300 opacity-40 pointer-events-none">
+          <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800/60">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Round Head Cap</span>
+              <span class="text-[9px] text-slate-500">Rounding at start of sweep</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleRoundHead" type="checkbox" checked class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-slate-800/60">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Round Tail Cap</span>
+              <span class="text-[9px] text-slate-500">Rounding at end of sweep</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleRoundTail" type="checkbox" checked class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Motion Physics & Animators -->
+      <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        <div>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">3. Motion Physics & Animators</h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">Define your transition math, rotation directions, and secondary effects.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Spin Speed slider -->
+          <div class="flex flex-col gap-1.5 col-span-1">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-semibold text-slate-300">Spin Speed</span>
+              <span id="speedVal" class="text-purple-400 font-medium font-mono">1.5s</span>
+            </div>
+            <input id="sliderSpeed" type="range" min="0.3" max="5" step="0.1" value="1.5" class="w-full accent-purple-500 h-1.5">
+          </div>
+
+          <!-- Rotation Direction -->
+          <div class="flex flex-col gap-1.5 col-span-1">
+            <span class="text-xs font-semibold text-slate-300">Sweep Direction</span>
+            <div class="grid grid-cols-2 gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800">
+              <button id="btnDirCw" class="text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all">Clockwise</button>
+              <button id="btnDirCcw" class="text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all">Reversed</button>
+            </div>
+          </div>
+
+          <!-- Easing styles -->
+          <div class="flex flex-col gap-1.5 col-span-1">
+            <span class="text-xs font-semibold text-slate-300">Easing Physics</span>
+            <select id="selectEasing" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-purple-500 cursor-pointer">
+              <option value="linear">Linear (Constant)</option>
+              <option value="ease-in-out">Smooth Ease (In-Out)</option>
+              <option value="steps">Retro Watch Ticking (Steps)</option>
+              <option value="bounce">Bouncy Swing (Cubic)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Continuous Hue-Shifting -->
+        <div class="pt-4 border-t border-slate-900 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-semibold text-slate-300">Hue-Shift Color Cycle Speed</span>
+              <span id="hueSpeedVal" class="text-purple-400 font-medium font-mono">Disabled</span>
+            </div>
+            <input id="sliderHueSpeed" type="range" min="0" max="10" step="0.5" value="0" class="w-full accent-purple-500 h-1.5">
+            <span class="text-[9px] text-slate-500">Cycles color spectrum (0 = static colors, 1s = hyper-fast shifting)</span>
+          </div>
+
+          <div class="flex flex-col gap-1.5 justify-center">
+            <!-- Central Start Angle Offset -->
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-semibold text-slate-300">Gradient Start Angle Offset</span>
+              <span id="offsetVal" class="text-purple-400 font-medium font-mono">0°</span>
+            </div>
+            <input id="sliderOffset" type="range" min="0" max="360" step="5" value="0" class="w-full accent-purple-500 h-1.5">
+          </div>
+        </div>
+
+        <!-- Secondary Physics Toggles -->
+        <div class="pt-4 border-t border-slate-900 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Breathing Pulse</span>
+              <span class="text-[10px] text-slate-500">Gentle scaling loop</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleBreathing" type="checkbox" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Reversing Sweep</span>
+              <span class="text-[10px] text-slate-500">Alternates back/forth</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleReversing" type="checkbox" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          <!-- Mirror Reflection Checkbox -->
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-slate-300 block">Mirror Reflection</span>
+              <span class="text-[10px] text-slate-500">Flips design horizontally</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input id="toggleMirror" type="checkbox" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Tracing Guide & Path Options -->
+      <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        <div>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">5. Tracing Path & Dynamic Morphing</h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">Control background guide tracks and configure active path trim morphing.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Guide Track Settings -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-300 block">Show Guide Track</span>
+                <span class="text-[10px] text-slate-500">Renders inactive base track outline</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggleTrack" type="checkbox" checked class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            <div id="trackSubcontrols" class="flex flex-col gap-3 transition-opacity duration-300">
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-400">Track Opacity</span>
+                  <span id="trackOpacityVal" class="text-purple-400 font-medium font-mono">15%</span>
+                </div>
+                <input id="sliderTrackOpacity" type="range" min="5" max="80" step="5" value="15" class="w-full accent-purple-500 h-1">
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <span class="text-[10px] font-semibold text-slate-400">Track Color</span>
+                <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                  <input id="colorTrack" type="color" value="#1e293b" class="w-5 h-5 rounded bg-transparent border-0 cursor-pointer">
+                  <span id="hexTrack" class="text-[10px] font-mono text-slate-300 uppercase">#1E293B</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Trim Path Morphing -->
+          <div class="flex flex-col gap-3 justify-start">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-300 block">Dynamic Trim Path (Morphing)</span>
+                <span class="text-[10px] text-slate-500">Active segment morphs length as it spins</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggleMorph" type="checkbox" class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+            <p class="text-[10px] text-slate-500 leading-relaxed pt-1">
+              When morphing is enabled, the sweep angle expands and contracts continuously (Material Design style) rather than rotating at a static, locked length.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Ambient Glows & Backdrop Settings -->
+      <div class="bg-slate-950 border border-slate-900 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        <div>
+          <h2 class="font-bold text-xs tracking-wide uppercase text-purple-400">6. Ambient Glows & Backdrop Settings</h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">Overlay custom high-intensity backplates and configure test backdrops.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Ambient Glow Toggle Panel -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-semibold text-slate-300 block">Enable Glow Layer</span>
+                <span class="text-[10px] text-slate-500">Soft radiant aesthetic backing</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="toggleGlow" type="checkbox" checked class="sr-only peer">
+                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+              </label>
+            </div>
+
+            <div id="glowSubcontrols" class="flex flex-col gap-3 transition-opacity duration-300">
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-slate-400">Glow Spread</span>
+                  <span id="blurVal" class="text-purple-400 font-medium font-mono">16px</span>
+                </div>
+                <input id="sliderBlur" type="range" min="4" max="40" step="1" value="16" class="w-full accent-purple-500 h-1.5">
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <div class="flex flex-col gap-1">
+                  <span class="text-[10px] font-semibold text-slate-400">Blend Mode</span>
+                  <select id="selectBlendMode" class="bg-slate-900 border border-slate-800 rounded-lg p-1.5 text-xs text-slate-300">
+                    <option value="screen">Screen (Default)</option>
+                    <option value="plus-lighter">Plus Lighter</option>
+                    <option value="overlay">Overlay</option>
+                    <option value="color-dodge">Color Dodge</option>
+                  </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <span class="text-[10px] font-semibold text-slate-400">Glow Override</span>
+                  <div class="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+                    <input id="toggleGlowOverride" type="checkbox" class="accent-purple-500">
+                    <input id="colorGlowOverride" type="color" value="#ffffff" class="w-5 h-5 rounded bg-transparent border-0 cursor-pointer">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environment Simulators & centerpiece -->
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-semibold text-slate-300">Backdrop Simulator</span>
+              <div class="grid grid-cols-4 gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <button id="btnBgDark" class="text-slate-300 hover:text-white bg-slate-800 text-[10px] py-1.5 rounded-lg font-semibold">Dark</button>
+                <button id="btnBgLight" class="text-slate-400 hover:text-white text-[10px] py-1.5 rounded-lg font-semibold">Light</button>
+                <button id="btnBgGrid" class="text-slate-400 hover:text-white text-[10px] py-1.5 rounded-lg font-semibold">Grid</button>
+                <button id="btnBgCustom" class="text-slate-400 hover:text-white text-[10px] py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1">
+                  <span>Custom</span>
+                  <input id="colorCustomBg" type="color" value="#111827" class="w-3 h-3 border-0 bg-transparent rounded cursor-pointer">
+                </button>
+              </div>
+            </div>
+
+            <!-- Central Content Mode -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-semibold text-slate-300">Central Info Overlay</span>
+              <div class="grid grid-cols-2 gap-2">
+                <select id="selectCenterpiece" class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-purple-500 cursor-pointer">
+                  <option value="none">Empty Center</option>
+                  <option value="percent">Percentage Count</option>
+                  <option value="custom">Custom Text</option>
+                </select>
+                <input id="inputCenterText" type="text" placeholder="Loading..." value="Loading..." class="bg-slate-900 border border-slate-800 rounded-xl px-2.5 text-xs text-slate-300 focus:outline-none focus:border-purple-500 hidden">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-slate-800 text-slate-200 px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="h-5 w-5 bg-green-500/10 rounded-full flex items-center justify-center text-green-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+    </div>
+    <span class="text-xs font-semibold">Snippet copied to your clipboard!</span>
+  </div>
+
+  <script>
+    // System States
+    let activeTab = 'css'; // css, canvas, svg
+    let direction = 'cw';  // cw, ccw
+    let centerpiecePercentage = 0;
+    let globalTime = 0; // Independent high-precision clock for canvas render thread
+
+    // Default Stops Collection
+    let colorStops = [
+      { id: '1', color: '#a855f7', opacity: 1.0, position: 0.00 },
+      { id: '2', color: '#22c55e', opacity: 1.0, position: 0.50 },
+      { id: '3', color: '#a855f7', opacity: 1.0, position: 1.00 }
+    ];
+
+    // Core DOM Handles
+    const loaderContainer = document.getElementById('loaderContainer');
+    const loaderRing = document.getElementById('loaderRing');
+    const loaderGlow = document.getElementById('loaderGlow');
+    const centerpieceText = document.getElementById('centerpieceText');
+    const previewSandbox = document.getElementById('previewSandbox');
+    const backdropGrid = document.getElementById('backdropGrid');
+    const backdropCustomColor = document.getElementById('backdropCustomColor');
+
+    // Controller Elements
+    const stopsContainer = document.getElementById('stopsContainer');
+    const btnAddStop = document.getElementById('btnAddStop');
+    const selectShape = document.getElementById('selectShape');
+    const toggleTaper = document.getElementById('toggleTaper');
+    const toggleComet = document.getElementById('toggleComet');
+    const toggleDashed = document.getElementById('toggleDashed');
+    const dashedControls = document.getElementById('dashedControls');
+    const sliderDashCount = document.getElementById('sliderDashCount');
+    const sliderDashGap = document.getElementById('sliderDashGap');
+    const dashCountVal = document.getElementById('dashCountVal');
+    const dashGapVal = document.getElementById('dashGapVal');
+
+    const sliderSize = document.getElementById('sliderSize');
+    const sliderThickness = document.getElementById('sliderThickness');
+    const sizeVal = document.getElementById('sizeVal');
+    const thicknessVal = document.getElementById('thicknessVal');
+
+    const sliderSpeed = document.getElementById('sliderSpeed');
+    const speedVal = document.getElementById('speedVal');
+    const selectEasing = document.getElementById('selectEasing');
+    const toggleBreathing = document.getElementById('toggleBreathing');
+    const toggleReversing = document.getElementById('toggleReversing');
+    const toggleMirror = document.getElementById('toggleMirror');
+    const btnDirCw = document.getElementById('btnDirCw');
+    const btnDirCcw = document.getElementById('btnDirCcw');
+
+    const toggleGlow = document.getElementById('toggleGlow');
+    const glowSubcontrols = document.getElementById('glowSubcontrols');
+    const sliderBlur = document.getElementById('sliderBlur');
+    const blurVal = document.getElementById('blurVal');
+    const selectBlendMode = document.getElementById('selectBlendMode');
+    const toggleGlowOverride = document.getElementById('toggleGlowOverride');
+    const colorGlowOverride = document.getElementById('colorGlowOverride');
+
+    const selectCenterpiece = document.getElementById('selectCenterpiece');
+    const inputCenterText = document.getElementById('inputCenterText');
+
+    // Sweep Settings Handles
+    const sliderSweep = document.getElementById('sliderSweep');
+    const sweepVal = document.getElementById('sweepVal');
+    const selectStrokeCap = document.getElementById('selectStrokeCap');
+    const sliderHueSpeed = document.getElementById('sliderHueSpeed');
+    const hueSpeedVal = document.getElementById('hueSpeedVal');
+    const sliderOffset = document.getElementById('sliderOffset');
+    const offsetVal = document.getElementById('offsetVal');
+
+    // Separate Sweep End Cap Handles
+    const partialSweepCapsContainer = document.getElementById('partialSweepCapsContainer');
+    const toggleRoundHead = document.getElementById('toggleRoundHead');
+    const toggleRoundTail = document.getElementById('toggleRoundTail');
+
+    // New Tracing Handles
+    const toggleTrack = document.getElementById('toggleTrack');
+    const trackSubcontrols = document.getElementById('trackSubcontrols');
+    const sliderTrackOpacity = document.getElementById('sliderTrackOpacity');
+    const trackOpacityVal = document.getElementById('trackOpacityVal');
+    const colorTrack = document.getElementById('colorTrack');
+    const hexTrack = document.getElementById('hexTrack');
+    const toggleMorph = document.getElementById('toggleMorph');
+
+    const tabCssBtn = document.getElementById('tabCssBtn');
+    const tabCanvasBtn = document.getElementById('tabCanvasBtn');
+    const tabSvgBtn = document.getElementById('tabSvgBtn');
+    const codeOutput = document.getElementById('codeOutput');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnReload = document.getElementById('btnReload');
+    const toast = document.getElementById('toast');
+
+    // Color conversion & Interpolation formulas for dynamic segmented draw loop
+    function hexToRgba(hex, opacity = 1) {
+      let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      let fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+      let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+        a: parseFloat(opacity)
+      } : { r: 168, g: 85, b: 247, a: 1 };
+    }
+
+    function interpolateColor(c1, c2, factor) {
+      const r = Math.round(c1.r + (c2.r - c1.r) * factor);
+      const g = Math.round(c1.g + (c2.g - c1.g) * factor);
+      const b = Math.round(c1.b + (c2.b - c1.b) * factor);
+      const a = c1.a + (c2.a - c1.a) * factor;
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    function getColorAtRatio(ratio, stops) {
+      if (stops.length === 0) return 'rgba(168, 85, 247, 1)';
+      const sorted = [...stops].sort((a, b) => a.position - b.position);
+      const r = Math.max(0, Math.min(1, ratio));
+
+      if (r <= sorted[0].position) {
+        const c = hexToRgba(sorted[0].color, sorted[0].opacity);
+        return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+      }
+      if (r >= sorted[sorted.length - 1].position) {
+        const c = hexToRgba(sorted[sorted.length - 1].color, sorted[sorted.length - 1].opacity);
+        return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+      }
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const s1 = sorted[i];
+        const s2 = sorted[i + 1];
+        if (r >= s1.position && r <= s2.position) {
+          const factor = (r - s1.position) / (s2.position - s1.position);
+          const c1 = hexToRgba(s1.color, s1.opacity);
+          const c2 = hexToRgba(s2.color, s2.opacity);
+          return interpolateColor(c1, c2, factor);
+        }
+      }
+      return 'rgba(168, 85, 247, 1)';
+    }
+
+    // Dynamic Color Stops Renderer UI
+    function renderStops() {
+      stopsContainer.innerHTML = '';
+      colorStops.forEach((stop, idx) => {
+        const isBoundary = idx === 0 || idx === colorStops.length - 1;
+        const stopRow = document.createElement('div');
+        stopRow.className = 'flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-800/80';
+        stopRow.innerHTML = `
+          <!-- Stop Indicator -->
+          <div class="flex items-center gap-1.5 min-w-[55px]">
+            <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span class="text-[10px] font-bold text-slate-400">Stop ${idx + 1}</span>
+          </div>
+          <!-- Color input -->
+          <div class="flex items-center gap-1.5 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
+            <input type="color" data-id="${stop.id}" data-prop="color" value="${stop.color}" class="w-6 h-6 border-0 bg-transparent rounded cursor-pointer">
+            <span class="text-[10px] font-mono text-slate-300 uppercase">${stop.color}</span>
+          </div>
+          <!-- Opacity slider -->
+          <div class="flex-1 flex flex-col gap-0.5 px-1 min-w-[70px]">
+            <div class="flex justify-between text-[9px] text-slate-500">
+              <span>Alpha</span>
+              <span class="font-mono text-purple-400">${Math.round(stop.opacity * 100)}%</span>
+            </div>
+            <input type="range" data-id="${stop.id}" data-prop="opacity" min="0" max="1" step="0.05" value="${stop.opacity}" class="w-full accent-purple-500 h-1">
+          </div>
+          <!-- Position slider -->
+          <div class="flex-1 flex flex-col gap-0.5 px-1 min-w-[70px] ${isBoundary ? 'opacity-30 pointer-events-none' : ''}">
+            <div class="flex justify-between text-[9px] text-slate-500">
+              <span>Position</span>
+              <span class="font-mono text-purple-400">${Math.round(stop.position * 100)}%</span>
+            </div>
+            <input type="range" data-id="${stop.id}" data-prop="position" min="0" max="1" step="0.01" value="${stop.position}" class="w-full accent-purple-500 h-1">
+          </div>
+          <!-- Delete button -->
+          <button data-id="${stop.id}" class="btn-delete-stop text-slate-500 hover:text-red-400 p-1 rounded transition-all text-xs flex items-center justify-center ${colorStops.length <= 2 ? 'opacity-30 pointer-events-none' : ''}">
+            ✕
+          </button>
+        `;
+        stopsContainer.appendChild(stopRow);
+      });
+
+      // Bind dynamic event listeners
+      stopsContainer.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const id = e.target.getAttribute('data-id');
+          const prop = e.target.getAttribute('data-prop');
+          const value = parseFloat(e.target.value) || e.target.value;
+
+          colorStops = colorStops.map(stop => {
+            if (stop.id === id) {
+              return { ...stop, [prop]: value };
+            }
+            return stop;
+          });
+          updateLoader();
+        });
+      });
+
+      stopsContainer.querySelectorAll('.btn-delete-stop').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.target.getAttribute('data-id');
+          colorStops = colorStops.filter(stop => stop.id !== id);
+
+          // Re-balance positions dynamically
+          colorStops[0].position = 0.0;
+          colorStops[colorStops.length - 1].position = 1.0;
+
+          renderStops();
+          updateLoader();
+        });
+      });
+    }
+
+    // Add Stop Handler
+    btnAddStop.addEventListener('click', () => {
+      if (colorStops.length >= 8) return;
+
+      const newId = Date.now().toString();
+      const insertAt = colorStops.length - 1;
+      const calculatedPos = parseFloat(((colorStops[insertAt - 1].position + colorStops[insertAt].position) / 2).toFixed(2));
+
+      colorStops.splice(insertAt, 0, {
+        id: newId,
+        color: '#3b82f6',
+        opacity: 1.0,
+        position: calculatedPos
+      });
+
+      renderStops();
+      updateLoader();
+    });
+
+    // Custom Path Generators for Shape morphing
+    function drawShapePath(ctx, shape, size, strokeWidth) {
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = (size - strokeWidth) / 2;
+
+      ctx.beginPath();
+      if (shape === 'circle') {
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      } else if (shape === 'squircle') {
+        const r = radius * 0.45; // corner rounding
+        ctx.moveTo(cx - radius + r, cy - radius);
+        ctx.arcTo(cx + radius, cy - radius, cx + radius, cy + radius, r);
+        ctx.arcTo(cx + radius, cy + radius, cx - radius, cy + radius, r);
+        ctx.arcTo(cx - radius, cy + radius, cx - radius, cy - radius, r);
+        ctx.arcTo(cx - radius, cy - radius, cx + radius, cy - radius, r);
+      } else if (shape === 'hexagon') {
+        for (let i = 0; i < 6; i++) {
+          const angle = (i * Math.PI) / 3 - Math.PI / 2;
+          const x = cx + radius * Math.cos(angle);
+          const y = cy + radius * Math.sin(angle);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+      } else if (shape === 'triangle') {
+        const offset = strokeWidth * 0.05;
+        for (let i = 0; i < 3; i++) {
+          const angle = (i * 2 * Math.PI) / 3 - Math.PI / 2;
+          const x = cx + radius * Math.cos(angle);
+          const y = cy + radius * Math.sin(angle) + offset;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+    }
+
+    // Geometry Helpers: Solve distance from center (0,0) to boundary of shape at a specific angle
+    function getPolygonDistanceAtAngle(N, angle, radius, offset = -Math.PI / 2) {
+      let theta = (angle - offset) % (Math.PI * 2);
+      if (theta < 0) theta += Math.PI * 2;
+
+      const angleStep = (Math.PI * 2) / N;
+      const idx = Math.floor(theta / angleStep);
+      const theta1 = idx * angleStep;
+      const theta2 = (idx + 1) * angleStep;
+
+      const phi = (theta1 + theta2) / 2;
+      return (radius * Math.cos(angleStep / 2)) / Math.cos(theta - phi);
+    }
+
+    function getDistanceAtAngle(shape, angle, radius) {
+      if (shape === 'circle') {
+        return radius;
+      } else if (shape === 'squircle') {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const r = radius * 0.45; // corner rounding match
+        const w = radius - r;
+        const h = radius - r;
+
+        const scale = 1 / Math.max(Math.abs(cos), Math.abs(sin));
+        const px = cos * scale * radius;
+        const py = sin * scale * radius;
+
+        if (Math.abs(px) > w && Math.abs(py) > h) {
+          const cx_corner = Math.sign(px) * w;
+          const cy_corner = Math.sign(py) * h;
+          const B = -2 * (cx_corner * cos + cy_corner * sin);
+          const C = cx_corner * cx_corner + cy_corner * cy_corner - r * r;
+          const det = B * B - 4 * C;
+          if (det >= 0) {
+            return (-B + Math.sqrt(det)) / 2;
+          }
+        }
+        return scale * radius;
+      } else if (shape === 'hexagon') {
+        return getPolygonDistanceAtAngle(6, angle, radius);
+      } else if (shape === 'triangle') {
+        return getPolygonDistanceAtAngle(3, angle, radius);
+      }
+      return radius;
+    }
+
+    // Dynamic Hardware-Accelerated Draw Dispatcher
+    function drawPlaygroundLoader(canvas, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, isGlow = false) {
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, size, size);
+
+      const strokeWidth = thickness;
+      const cx = size / 2;
+      const cy = size / 2;
+
+      // Draw faint guide track underneath first if enabled
+      if (toggleTrack.checked) {
+        ctx.save();
+        const baseTrackColorHex = colorTrack.value;
+        const baseTrackOpacity = parseFloat(sliderTrackOpacity.value) / 100;
+        const trackRgb = hexToRgba(baseTrackColorHex, baseTrackOpacity);
+
+        ctx.strokeStyle = `rgba(${trackRgb.r}, ${trackRgb.g}, ${trackRgb.b}, ${trackRgb.a})`;
+        ctx.lineWidth = strokeWidth;
+        ctx.lineCap = strokeCap;
+        drawShapePath(ctx, shape, size, strokeWidth);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save(); // Save 1: Core state before mirror & wedge clip
+
+      // Inverted Mirror Logic: Flipped horizontally by default (unchecked) to show the preferred layout, unmirrored when checked.
+      if (!toggleMirror.checked) {
+        ctx.translate(size, 0);
+        ctx.scale(-1, 1);
+      }
+
+      const startRad = (-Math.PI / 2) + (offsetAngle * Math.PI / 180);
+      const sweepRad = (Math.PI * 2 * (sweepPercent / 100));
+      const endRad = startRad + sweepRad;
+
+      // Apply Variable Sweep via Wedge Clipping
+      ctx.save(); // Save 2: Before wedge clip
+      if (sweepPercent < 100) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, size * 1.5, startRad, endRad);
+        ctx.closePath();
+        ctx.clip();
+      }
+
+      const useGlowOverride = isGlow && toggleGlowOverride.checked;
+      const glowOverrideColor = colorGlowOverride.value;
+
+      // Handle Tapered / Comet Conical Sweep Drawing
+      if ((tapered || comet) && shape === 'circle') {
+        const segments = 120;
+        ctx.lineCap = (sweepPercent < 100) ? 'butt' : strokeCap;
+
+        for (let i = 0; i < segments; i++) {
+          const ratio = i / segments;
+          const angle1 = startRad + sweepRad * ratio;
+          const angle2 = startRad + sweepRad * ((i + 1.05) / segments);
+
+          ctx.lineWidth = tapered ? strokeWidth * (1 - ratio * 0.85) : strokeWidth;
+          let baseColorStr = getColorAtRatio(ratio, colorStops);
+
+          if (comet && !isGlow) {
+            let match = baseColorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+            if (match) {
+              let r = match[1];
+              let g = match[2];
+              let b = match[3];
+              let a = match[4] !== undefined ? parseFloat(match[4]) : 1.0;
+              baseColorStr = `rgba(${r}, ${g}, ${b}, ${a * (1 - ratio)})`;
+            }
+          }
+
+          if (useGlowOverride) {
+            const glowRgb = hexToRgba(glowOverrideColor, 1 - (tapered ? ratio * 0.85 : 0));
+            ctx.strokeStyle = `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, ${glowRgb.a * (comet ? (1 - ratio) : 1)})`;
+          } else {
+            ctx.strokeStyle = baseColorStr;
+          }
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, (size - strokeWidth) / 2, angle1, angle2);
+          ctx.stroke();
+        }
+      } else {
+        // Default Continuous Conic Gradient Strokes for shapes
+        let gradient;
+        try {
+          gradient = ctx.createConicGradient((-Math.PI / 2) + (offsetAngle * Math.PI / 180), cx, cy);
+        } catch (e) {
+          gradient = ctx.createRadialGradient(cx, cy, (size/2) * 0.7, cx, cy, size/2);
+        }
+
+        if (useGlowOverride) {
+          const glowRgb = hexToRgba(glowOverrideColor, 1);
+          gradient.addColorStop(0, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 1)`);
+          gradient.addColorStop(1, `rgba(${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}, 1)`);
+        } else {
+          colorStops.forEach(stop => {
+            const rgb = hexToRgba(stop.color, stop.opacity);
+            const adjustedPosition = stop.position * (sweepPercent / 100);
+            const fadeFactor = comet ? (1 - stop.position) : 1;
+            gradient.addColorStop(adjustedPosition, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a * fadeFactor})`);
+          });
+          if (sweepPercent < 100) {
+            gradient.addColorStop(sweepPercent / 100, 'rgba(0,0,0,0)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+          }
+        }
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = strokeWidth;
+        ctx.lineCap = (sweepPercent < 100) ? 'butt' : strokeCap;
+
+        if (isDashed) {
+          const perimeter = shape === 'circle' ? (Math.PI * (size - strokeWidth)) : (size * 3);
+          const dashLen = ((perimeter * (sweepPercent / 100)) / dashCount) - dashGap;
+          ctx.setLineDash([Math.max(1, dashLen), Math.max(1, dashGap)]);
+        } else {
+          ctx.setLineDash([]);
+        }
+
+        drawShapePath(ctx, shape, size, strokeWidth);
+        ctx.stroke();
+      }
+
+      ctx.restore(); // Restore 2: Back to mirrored state (removes wedge clip, but retains mirror!)
+
+      // Draw separate custom round caps if coverage < 100%
+      if (sweepPercent < 100) {
+        const radius_nom = (size - strokeWidth) / 2;
+        const r_s = getDistanceAtAngle(shape, startRad, radius_nom);
+        const r_e = getDistanceAtAngle(shape, endRad, radius_nom);
+        const yOffset = (shape === 'triangle') ? (strokeWidth * 0.05) : 0;
+
+        const hx = cx + r_s * Math.cos(startRad);
+        const hy = cy + r_s * Math.sin(startRad) + yOffset;
+
+        const tx = cx + r_e * Math.cos(endRad);
+        const ty = cy + r_e * Math.sin(endRad) + yOffset;
+
+        if (roundHead) {
+          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(0, colorStops);
+          ctx.beginPath();
+          ctx.arc(hx, hy, strokeWidth / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (roundTail) {
+          const tailOpacity = comet ? 0 : 1;
+          ctx.fillStyle = useGlowOverride ? glowOverrideColor : getColorAtRatio(sweepPercent / 100, colorStops);
+          ctx.save();
+          ctx.globalAlpha = tailOpacity;
+          ctx.beginPath();
+          ctx.arc(tx, ty, strokeWidth / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      ctx.restore(); // Restore 1: Back to original state (completely clean for next redraw)
+    }
+
+    // Dynamic keyframe generator for Physics Easings, Direction & Color Cycling combos
+    function applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed) {
+      let injectedSheet = document.getElementById('dynamic-physics-sheet');
+      if (!injectedSheet) {
+        injectedSheet = document.createElement('style');
+        injectedSheet.id = 'dynamic-physics-sheet';
+        document.head.appendChild(injectedSheet);
+      }
+
+      let animFunction = 'linear';
+      if (easing === 'ease-in-out') animFunction = 'ease-in-out';
+      else if (easing === 'steps') animFunction = 'steps(12, end)';
+      else if (easing === 'bounce') animFunction = 'cubic-bezier(0.68, -0.6, 0.32, 1.6)';
+
+      let spinKeyframes = '';
+      if (isReversing) {
+        spinKeyframes = `
+          @keyframes dynamic-spin {
+            0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }
+            45% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }
+            50% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }
+            95% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }
+            100% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }
+          }
+        `;
+      } else {
+        const endAngle = direction === 'cw' ? '360deg' : '-360deg';
+        const midAngle = direction === 'cw' ? '180deg' : '-180deg';
+        spinKeyframes = `
+          @keyframes dynamic-spin {
+            0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }
+            ${isBreathing ? `50% { transform: rotate(${midAngle}) scale(1.08); }` : ''}
+            100% { transform: rotate(${endAngle}) ${isBreathing ? 'scale(0.92)' : ''}; }
+          }
+        `;
+      }
+
+      // Continuous Color cycle implementation
+      let hueAnimation = '';
+      let colorShiftRule = '';
+      if (hueSpeed > 0) {
+        hueAnimation = `
+          @keyframes dynamic-hue {
+            to { filter: hue-rotate(360deg); }
+          }
+        `;
+        colorShiftRule = `, dynamic-hue ${hueSpeed}s linear infinite`;
+      }
+
+      injectedSheet.textContent = `
+        ${spinKeyframes}
+        ${hueAnimation}
+        #loaderContainer {
+          animation: dynamic-spin ${speed}s ${animFunction} infinite ${colorShiftRule} !important;
+        }
+      `;
+    }
+
+    // Live controller pipeline mapping inputs to outputs
+    function updateLoader() {
+      const size = parseInt(sliderSize.value);
+      const thickness = parseInt(sliderThickness.value);
+      const shape = selectShape.value;
+      const speed = parseFloat(sliderSpeed.value);
+      const easing = selectEasing.value;
+      const isBreathing = toggleBreathing.checked;
+      const isReversing = toggleReversing.checked;
+      const isDashed = toggleDashed.checked;
+      const dashCount = parseInt(sliderDashCount.value);
+      const dashGap = parseInt(sliderDashGap.value);
+      const tapered = toggleTaper.checked;
+      const comet = toggleComet.checked;
+
+      const glowOn = toggleGlow.checked;
+      const blur = parseInt(sliderBlur.value);
+      const blendMode = selectBlendMode.value;
+
+      // Coverage wedge values
+      const sweepPercent = parseInt(sliderSweep.value);
+      const strokeCap = selectStrokeCap.value;
+      const hueSpeed = parseFloat(sliderHueSpeed.value);
+      const offsetAngle = parseInt(sliderOffset.value);
+
+      // Separate Cap Toggles
+      const roundHead = toggleRoundHead.checked;
+      const roundTail = toggleRoundTail.checked;
+
+      // Tracing Settings
+      const showTrack = toggleTrack.checked;
+      const trackColorHex = colorTrack.value;
+      const trackOpacity = parseInt(sliderTrackOpacity.value);
+      const isMorphing = toggleMorph.checked;
+
+      // Sync active sliders text metrics
+      sizeVal.textContent = `${size}px`;
+      thicknessVal.textContent = `${thickness}px`;
+      dashCountVal.textContent = dashCount;
+      dashGapVal.textContent = `${dashGap}px`;
+      blurVal.textContent = `${blur}px`;
+      speedVal.textContent = `${speed}s`;
+      sweepVal.textContent = `${sweepPercent}%`;
+      offsetVal.textContent = `${offsetAngle}°`;
+      hueSpeedVal.textContent = hueSpeed > 0 ? `${hueSpeed}s` : 'Disabled';
+      trackOpacityVal.textContent = `${trackOpacity}%`;
+      hexTrack.textContent = trackColorHex.toUpperCase();
+
+      // Lock partial sweep caps container if at full coverage
+      if (sweepPercent < 100) {
+        partialSweepCapsContainer.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        partialSweepCapsContainer.classList.add('opacity-40', 'pointer-events-none');
+      }
+
+      if (isDashed) {
+        dashedControls.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        dashedControls.classList.add('opacity-40', 'pointer-events-none');
+      }
+
+      if (showTrack) {
+        trackSubcontrols.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        trackSubcontrols.classList.add('opacity-40', 'pointer-events-none');
+      }
+
+      if (glowOn) {
+        glowSubcontrols.classList.remove('opacity-40', 'pointer-events-none');
+        loaderGlow.style.opacity = '0.75';
+        loaderGlow.style.mixBlendMode = blendMode;
+      } else {
+        glowSubcontrols.classList.add('opacity-40', 'pointer-events-none');
+        loaderGlow.style.opacity = '0';
+      }
+
+      // Update Live Canvas layers sizes
+      loaderContainer.style.width = `${size}px`;
+      loaderContainer.style.height = `${size}px`;
+
+      // Draw immediate frame (non-morphing baseline)
+      if (!isMorphing) {
+        drawPlaygroundLoader(loaderRing, size, thickness, shape, isDashed, dashCount, dashGap, tapered, comet, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, false);
+        if (glowOn) {
+          drawPlaygroundLoader(loaderGlow, size, thickness, shape, isDashed, dashCount, dashGap, tapered, sweepPercent, strokeCap, offsetAngle, roundHead, roundTail, true);
+        }
+      }
+
+      // Sync Physics Animations (spin speed + color shifting)
+      applyPhysicsStyles(speed, easing, isBreathing, isReversing, hueSpeed);
+
+      // centerpiece visual config
+      const centerpieceMode = selectCenterpiece.value;
+      if (centerpieceMode === 'none') {
+        centerpieceText.textContent = '';
+        inputCenterText.classList.add('hidden');
+      } else if (centerpieceMode === 'percent') {
+        centerpieceText.textContent = `${Math.floor(centerpiecePercentage)}%`;
+        inputCenterText.classList.add('hidden');
+      } else if (centerpieceMode === 'custom') {
+        centerpieceText.textContent = inputCenterText.value;
+        inputCenterText.classList.remove('hidden');
+      }
+
+      generateExportTemplates();
+    }
+
+    // Generator Export Tab Handler
+    function generateExportTemplates() {
+      const size = parseInt(sliderSize.value);
+      const thickness = parseInt(sliderThickness.value);
+      const shape = selectShape.value;
+      const speed = parseFloat(sliderSpeed.value);
+      const easing = selectEasing.value;
+      const isBreathing = toggleBreathing.checked;
+      const isReversing = toggleReversing.checked;
+      const isDashed = toggleDashed.checked;
+      const dashCount = parseInt(sliderDashCount.value);
+      const dashGap = parseInt(sliderDashGap.value);
+      const tapered = toggleTaper.checked;
+      const comet = toggleComet.checked;
+      const glowOn = toggleGlow.checked;
+      const blur = parseInt(sliderBlur.value);
+      const blendMode = selectBlendMode.value;
+
+      // Coverage variables
+      const sweepPercent = parseInt(sliderSweep.value);
+      const strokeCap = selectStrokeCap.value;
+      const hueSpeed = parseFloat(sliderHueSpeed.value);
+      const offsetAngle = parseInt(sliderOffset.value);
+
+      // Separate Cap values
+      const roundHead = toggleRoundHead.checked;
+      const roundTail = toggleRoundTail.checked;
+
+      // Tracing Settings
+      const showTrack = toggleTrack.checked;
+      const trackColorHex = colorTrack.value;
+      const trackOpacityValNum = parseFloat(sliderTrackOpacity.value) / 100;
+
+      const startRad = (-Math.PI / 2) + (offsetAngle * Math.PI / 180);
+      const sweepRad = (Math.PI * 2 * (sweepPercent / 100));
+      const endRad = startRad + sweepRad;
+      const cx = size / 2;
+      const cy = size / 2;
+
+      // Setup gradient text definition
+      let conicGradientString = `conic-gradient(from ${offsetAngle}deg`;
+      colorStops.forEach(stop => {
+        const scaledPosition = Math.round(stop.position * sweepPercent);
+        let stopColor = stop.color;
+
+        // Output faded rgba colors if Comet is checked
+        if (comet) {
+          const rgb = hexToRgba(stop.color, stop.opacity * (1 - stop.position));
+          stopColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a.toFixed(2)})`;
+        }
+        conicGradientString += `, ${stopColor} ${scaledPosition}%`;
+      });
+      if (sweepPercent < 100) {
+        conicGradientString += `, transparent ${sweepPercent}%, transparent 100%`;
+      }
+      conicGradientString += ')';
+
+      if (activeTab === 'css') {
+        // --- Tab 1: Modern CSS Mask code block ---
+        let html = `<!-- Modern Masked CSS Spinner -->\n<div class="loader-container">\n`;
+        if (showTrack) {
+          html += `  <div class="loader-track"></div>\n`;
+        }
+        if (glowOn) {
+          html += `  <div class="loader-glow"></div>\n`;
+        }
+        html += `  <div class="loader-ring"></div>\n</div>`;
+
+        // Apply Mirror Reflection onto parent container to prevent animation transform overrides!
+        const mirrorCSSRule = !toggleMirror.checked ? '  transform: scaleX(-1);\n' : '';
+
+        let css = `/* Core Container */\n.loader-container {\n  position: relative;\n  width: ${size}px;\n  height: ${size}px;\n${mirrorCSSRule}}\n\n`;
+
+        let easingVal = 'linear';
+        if (easing === 'ease-in-out') easingVal = 'ease-in-out';
+        else if (easing === 'steps') easingVal = 'steps(12, end)';
+        else if (easing === 'bounce') easingVal = 'cubic-bezier(0.68, -0.6, 0.32, 1.6)';
+
+        const breathingRule = isBreathing ? 'scale(1.08)' : '';
+        const endAngle = direction === 'cw' ? '360deg' : '-360deg';
+        const midAngle = direction === 'cw' ? '180deg' : '-180deg';
+
+        let spinAnimations = `spin ${speed}s ${easingVal} infinite`;
+        if (hueSpeed > 0) {
+          spinAnimations += `, hue-shift ${hueSpeed}s linear infinite`;
+        }
+
+        if (showTrack) {
+          const rgbTrack = hexToRgba(trackColorHex, trackOpacityValNum);
+          css += `/* Guide Track Path */\n.loader-track {\n  position: absolute;\n  inset: 0;\n  border-radius: ${shape === 'circle' ? '50%' : '14px'};\n  border: ${thickness}px solid rgba(${rgbTrack.r}, ${rgbTrack.g}, ${rgbTrack.b}, ${rgbTrack.a.toFixed(2)});\n  pointer-events: none;\n}\n\n`;
+        }
+
+        css += `/* Spin element */\n.loader-ring {\n  position: absolute;\n  inset: 0;\n  border-radius: ${shape === 'circle' ? '50%' : '14px'};\n  background: ${conicGradientString};\n  animation: ${spinAnimations};\n`;
+
+        if (shape !== 'circle' || isDashed || tapered || sweepPercent < 100) {
+          css += `  /* NOTE: Complex polygon boundaries, dash gaps, and separate custom end-caps (Head/Tail) are best built using the Canvas JS or SVG Exporter tabs. */\n`;
+        }
+
+        // Standard radial mask properties
+        const maskPercent = thickness;
+        const maskOuter = thickness + 0.5;
+        css += `  -webkit-mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n}\n\n`;
+
+        if (glowOn) {
+          let glowColor = conicGradientString;
+          if (toggleGlowOverride.checked) {
+            glowColor = colorGlowOverride.value;
+          }
+          css += `/* Ambient Glow backdrop */\n.loader-glow {\n  position: absolute;\n  inset: -4px;\n  border-radius: ${shape === 'circle' ? '50%' : '14px'};\n  background: ${glowColor};\n  animation: ${spinAnimations};\n  -webkit-mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  mask-image: radial-gradient(circle, transparent ${maskPercent}%, black ${maskOuter}%);\n  filter: blur(${blur}px);\n  opacity: 0.75;\n  mix-blend-mode: ${blendMode};\n  pointer-events: none;\n}\n\n`;
+        }
+
+        // Add correct dynamic keyframe structure
+        if (isReversing) {
+          css += `/* Direction Sweeping Sequence */\n@keyframes spin {\n  0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  45% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }\n  50% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }\n  95% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  100% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n}`;
+        } else {
+          css += `/* Standard Rotation */\n@keyframes spin {\n  0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  ${isBreathing ? `50% { transform: rotate(${midAngle}) scale(1.08); }\n` : ''}  100% { transform: rotate(${endAngle}) ${isBreathing ? 'scale(0.92)' : ''}; }\n}`;
+        }
+
+        if (hueSpeed > 0) {
+          css += `\n\n/* Continuous Hue Rotation */\n@keyframes hue-shift {\n  to { filter: hue-rotate(360deg); }\n}`;
+        }
+
+        codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>`;
+
+      } else if (activeTab === 'canvas') {
+        // --- Tab 2: HTML5 Canvas code block ---
+        let html = `<!-- Hardware Accelerated Canvas Loader -->\n<div class="loader-container">\n`;
+        if (glowOn) html += `  <canvas id="glowLayer" style="position: absolute; inset: -4px; filter: blur(${blur}px); opacity: 0.75; mix-blend-mode: ${blendMode}; pointer-events: none;"></canvas>\n`;
+        html += `  <canvas id="ringLayer" style="position: absolute; inset: 0;"></canvas>\n</div>`;
+
+        let easingVal = 'linear';
+        if (easing === 'ease-in-out') easingVal = 'ease-in-out';
+        else if (easing === 'steps') easingVal = 'steps(12, end)';
+        else if (easing === 'bounce') easingVal = 'cubic-bezier(0.68, -0.6, 0.32, 1.6)';
+
+        const endAngle = direction === 'cw' ? '360deg' : '-360deg';
+        const midAngle = direction === 'cw' ? '180deg' : '-180deg';
+
+        let spinAnimations = `spin ${speed}s ${easingVal} infinite`;
+        if (hueSpeed > 0) {
+          spinAnimations += `, hue-shift ${hueSpeed}s linear infinite`;
+        }
+
+        let css = `/* Dynamic Container Rotation */\n.loader-container {\n  position: relative;\n  width: ${size}px;\n  height: ${size}px;\n  animation: ${spinAnimations};\n}\n\n`;
+
+        if (isReversing) {
+          css += `@keyframes spin {\n  0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  45% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }\n  50% { transform: rotate(360deg) ${isBreathing ? 'scale(1.08)' : ''}; }\n  95% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  100% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n}`;
+        } else {
+          css += `@keyframes spin {\n  0% { transform: rotate(0deg) ${isBreathing ? 'scale(0.92)' : ''}; }\n  ${isBreathing ? `50% { transform: rotate(${midAngle}) scale(1.08); }\n` : ''}  100% { transform: rotate(${endAngle}) ${isBreathing ? 'scale(0.92)' : ''}; }\n}`;
+        }
+
+        if (hueSpeed > 0) {
+          css += `\n\n@keyframes hue-shift {\n  to { filter: hue-rotate(360deg); }\n}`;
+        }
+
+        let js = `const initCanvasLoader = () => {\n  const ring = document.getElementById('ringLayer');\n  const glow = document.getElementById('glowLayer');\n  const size = ${size};\n\n  const draw = (canvas, isGlow) => {\n    const ctx = canvas.getContext('2d');\n    canvas.width = size;\n    canvas.height = size;\n    ctx.clearRect(0, 0, size, size);\n\n    const cx = size / 2;\n    const cy = size / 2;\n    const thickness = ${thickness};\n\n    ctx.save();\n`;
+
+        // Apply Inverted Mirror Transformation inside Canvas script export
+        if (!toggleMirror.checked) {
+          js += `    // Apply Mirror Reflection coordinate transformation\n    ctx.translate(size, 0);\n    ctx.scale(-1, 1);\n`;
+        }
+
+        // Include guide track render if toggled
+        if (toggleTrack.checked) {
+          const trackRgb = hexToRgba(colorTrack.value, parseFloat(sliderTrackOpacity.value)/100);
+          js += `    // Render Guide Track Path\n    ctx.strokeStyle = 'rgba(${trackRgb.r}, ${trackRgb.g}, ${trackRgb.b}, ${trackRgb.a})';\n    ctx.lineWidth = thickness;\n    ctx.lineCap = 'round';\n    ctx.beginPath();\n`;
+          if (shape === 'circle') {
+            js += `    ctx.arc(cx, cy, (size - thickness) / 2, 0, Math.PI * 2);\n`;
+          } else if (shape === 'squircle') {
+            js += `    const r = (size - thickness) / 2 * 0.45;\n    const radius = (size - thickness) / 2;\n    ctx.moveTo(cx - radius + r, cy - radius);\n    ctx.arcTo(cx + radius, cy - radius, cx + radius, cy + radius, r);\n    ctx.arcTo(cx + radius, cy + radius, cx - radius, cy + radius, r);\n    ctx.arcTo(cx - radius, cy + radius, cx - radius, cy - radius, r);\n    ctx.arcTo(cx - radius, cy - radius, cx + radius, cy - radius, r);\n`;
+          } else {
+            js += `    // Draw non-circular paths...\n`;
+          }
+          js += `    ctx.stroke();\n\n`;
+        }
+
+        js += `    const startRad = (-Math.PI / 2) + (${offsetAngle} * Math.PI / 180);\n`;
+        js += `    const sweepRad = (Math.PI * 2 * (${sweepPercent}/100));\n`;
+        js += `    const endRad = startRad + sweepRad;\n`;
+
+        js += `    ctx.save();\n`;
+        if (sweepPercent < 100) {
+          js += `    if (${sweepPercent} < 100) {\n      ctx.beginPath();\n      ctx.moveTo(cx, cy);\n      ctx.arc(cx, cy, size * 1.5, startRad, endRad);\n      ctx.closePath();\n      ctx.clip();\n    }\n`;
+        }
+
+        if ((tapered || comet) && shape === 'circle') {
+          js += `    // Render Conical Line Stroke Segments\n    const segments = 120;\n    ctx.lineCap = '${sweepPercent < 100 ? 'butt' : strokeCap}';\n    for (let i = 0; i < segments; i++) {\n      const ratio = i / segments;\n      ctx.lineWidth = ${tapered} ? thickness * (1 - ratio * 0.85) : thickness;\n      let colorVal = getRatioColor(ratio);\n      if (${comet} && !isGlow) {\n        colorVal = fadeColorOpacity(colorVal, 1 - ratio);\n      }\n      ctx.strokeStyle = isGlow ? '${toggleGlowOverride.checked ? colorGlowOverride.value : colorStops[0].color}' : colorVal;\n      ctx.beginPath();\n      ctx.arc(cx, cy, (size - thickness)/2, startRad + sweepRad * ratio, startRad + sweepRad * ((i+1.05)/segments));\n      ctx.stroke();\n    }\n`;
+        } else {
+          js += `    // Render Conic Gradient Path\n    const grad = ctx.createConicGradient((-Math.PI / 2) + (${offsetAngle} * Math.PI / 180), cx, cy);\n`;
+          colorStops.forEach(stop => {
+            const stopScaled = stop.position * (sweepPercent / 100);
+            let stopColor = stop.color;
+            if (comet) {
+              const rgb = hexToRgba(stop.color, stop.opacity * (1 - stop.position));
+              stopColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${rgb.a.toFixed(2)})`;
+            }
+            js += `    grad.addColorStop(${stopScaled.toFixed(3)}, '${stopColor}');\n`;
+          });
+          if (sweepPercent < 100) {
+            js += `      grad.addColorStop(${sweepPercent / 100}, 'transparent');\n`;
+          }
+
+          js += `\n    ctx.strokeStyle = grad;\n    ctx.lineWidth = thickness;\n    ctx.lineCap = '${sweepPercent < 100 ? 'butt' : strokeCap}';\n`;
+
+          if (isDashed) {
+            js += `    const perimeter = ${shape === 'circle' ? 'Math.PI * (size - thickness)' : 'size * 3'};\n    const dashLen = ((perimeter * (${sweepPercent}/100)) / ${dashCount}) - ${dashGap};\n    ctx.setLineDash([Math.max(1, dashLen), ${dashGap}]);\n`;
+          }
+
+          js += `\n    ctx.beginPath();\n`;
+          if (shape === 'circle') {
+            js += `    ctx.arc(cx, cy, (size - thickness) / 2, 0, Math.PI * 2);\n`;
+          } else if (shape === 'squircle') {
+            js += `    const r = (size - thickness) / 2 * 0.45;\n    const radius = (size - thickness) / 2;\n    ctx.moveTo(cx - radius + r, cy - radius);\n    ctx.arcTo(cx + radius, cy - radius, cx + radius, cy + radius, r);\n    ctx.arcTo(cx + radius, cy + radius, cx - radius, cy + radius, r);\n    ctx.arcTo(cx - radius, cy + radius, cx - radius, cy - radius, r);\n    ctx.arcTo(cx - radius, cy - radius, cx + radius, cy - radius, r);\n`;
+          } else if (shape === 'hexagon') {
+            js += `    const radius = (size - thickness) / 2;\n    for(let i=0; i<6; i++) {\n      const angle = (i * Math.PI) / 3 - Math.PI / 2;\n      ctx.lineTo(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle));\n    }\n`;
+          } else if (shape === 'triangle') {
+            js += `    const radius = (size - thickness) / 2;\n    for(let i=0; i<3; i++) {\n      const angle = (i * 2 * Math.PI) / 3 - Math.PI / 2;\n      ctx.lineTo(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle));\n    }\n`;
+          }
+          js += `    ctx.closePath();\n    ctx.stroke();\n`;
+        }
+
+        js += `    ctx.restore();\n`;
+
+        if (sweepPercent < 100) {
+          js += `\n    // Draw Separate Custom End Caps\n`;
+          js += `    if (${roundHead} || ${roundTail}) {\n`;
+          js += `      const radius_nom = (size - thickness) / 2;\n`;
+          js += `      const yOffset = '${shape}' === 'triangle' ? (thickness * 0.05) : 0;\n`;
+          js += `      \n      if (${roundHead}) {\n`;
+          js += `        const r_s = getDistanceAtAngle('${shape}', startRad, radius_nom);\n`;
+          js += `        const hx = cx + r_s * Math.cos(startRad);\n`;
+          js += `        const hy = cy + r_s * Math.sin(startRad) + yOffset;\n`;
+          js += `        ctx.fillStyle = isGlow ? '${toggleGlowOverride.checked ? colorGlowOverride.value : colorStops[0].color}' : getRatioColor(0);\n`;
+          js += `        ctx.beginPath();\n`;
+          js += `        ctx.arc(hx, hy, thickness / 2, 0, Math.PI * 2);\n`;
+          js += `        ctx.fill();\n`;
+          js += `      }\n`;
+          js += `      if (${roundTail}) {\n`;
+          js += `        const r_e = getDistanceAtAngle('${shape}', endRad, radius_nom);\n`;
+          js += `        const tx = cx + r_e * Math.cos(endRad);\n`;
+          js += `        const ty = cy + r_e * Math.sin(endRad) + yOffset;\n`;
+          js += `        ctx.fillStyle = isGlow ? '${toggleGlowOverride.checked ? colorGlowOverride.value : getColorAtRatio(sweepPercent/100, colorStops)}' : getRatioColor(${sweepPercent/100});\n`;
+          js += `          ctx.save();\n          ctx.globalAlpha = ${comet} ? 0 : 1;\n          ctx.beginPath();\n          ctx.arc(tx, ty, thickness / 2, 0, Math.PI * 2);\n          ctx.fill();\n          ctx.restore();\n`;
+          js += `      }\n`;
+          js += `    }\n`;
+        }
+
+        js += `    ctx.restore();\n`;
+        js += `  };\n\n  const getDistanceAtAngle = (shape, angle, radius) => {\n`;
+        js += `    if (shape === 'circle') return radius;\n`;
+        js += `    const cos = Math.cos(angle); const sin = Math.sin(angle);\n`;
+        js += `    if (shape === 'squircle') {\n`;
+        js += `      const r = radius * 0.45; const w = radius - r; const h = radius - r;\n`;
+        js += `      const scale = 1 / Math.max(Math.abs(cos), Math.abs(sin));\n`;
+        js += `      const px = cos * scale * radius; const py = sin * scale * radius;\n`;
+        js += `      if (Math.abs(px) > w && Math.abs(py) > h) {\n`;
+        js += `        const cx_corner = Math.sign(px) * w; const cy_corner = Math.sign(py) * h;\n`;
+        js += `        const B = -2 * (cx_corner * cos + cy_corner * sin);\n`;
+        js += `        const C = cx_corner * cx_corner + cy_corner * cy_corner - r * r;\n`;
+        js += `        const det = B * B - 4 * C;\n`;
+        js += `        if (det >= 0) return (-B + Math.sqrt(det)) / 2;\n`;
+        js += `      }\n`;
+        js += `      return scale * radius;\n`;
+        js += `    } else {\n`;
+        js += `      const N = shape === 'hexagon' ? 6 : 3;\n`;
+        js += `      let theta = (angle - (-Math.PI/2)) % (Math.PI * 2);\n`;
+        js += `      if (theta < 0) theta += Math.PI * 2;\n`;
+        js += `      const angleStep = (Math.PI * 2) / N;\n`;
+        js += `      const idx = Math.floor(theta / angleStep);\n`;
+        js += `      const phi = ((idx * angleStep) + ((idx + 1) * angleStep)) / 2;\n`;
+        js += `      return (radius * Math.cos(angleStep / 2)) / Math.cos(theta - phi);\n`;
+        js += `    }\n`;
+        js += `  };\n`;
+
+        js += `\n  const getRatioColor = (r) => {\n    const stops = ${JSON.stringify(colorStops)};\n    return stops[0].color;\n  };\n\n`;
+        js += `  const fadeColorOpacity = (c, factor) => { return c; };\n\n`;
+
+        js += `  draw(ring, false);\n  if (glow) draw(glow, true);\n};\nwindow.addEventListener('load', initCanvasLoader);`;
+
+        codeOutput.textContent = `${html}\n\n<style>\n${css}\n</style>\n\n<script>\n${js}\n<\/script>`;
+
+      } else if (activeTab === 'svg') {
+        // --- Tab 3: Native Vector SVG tab ---
+        let svgGradientDefs = '';
+        colorStops.forEach(stop => {
+          const opacity = comet ? stop.opacity * (1 - stop.position) : stop.opacity;
+          svgGradientDefs += `    <stop offset="${Math.round(stop.position * 100)}%" stop-color="${stop.color}" stop-opacity="${opacity}" />\n`;
+        });
+
+        const radius = (size - thickness) / 2;
+        const yOffset = (shape === 'triangle') ? (thickness * 0.05) : 0;
+
+        let pathD = '';
+        if (shape === 'circle') {
+          if (sweepPercent < 100) {
+            const x1 = cx + radius * Math.cos(startRad);
+            const y1 = cy + radius * Math.sin(startRad);
+            const x2 = cx + radius * Math.cos(endRad);
+            const y2 = cy + radius * Math.sin(endRad);
+            const largeArcFlag = sweepPercent > 50 ? 1 : 0;
+            pathD = `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+          } else {
+            pathD = `M ${cx} ${cy - radius} A ${radius} ${radius} 0 1 1 ${cx - 0.01} ${cy - radius}`;
+          }
+        } else if (shape === 'squircle') {
+          const r = radius * 0.45;
+          pathD = `M ${cx - radius + r} ${cy - radius} L ${cx + radius - r} ${cy - radius} A ${r} ${r} 0 0 1 ${cx + radius} ${cy - radius + r} L ${cx + radius} ${cy + radius - r} A ${r} ${r} 0 0 1 ${cx - r + radius} ${cy + radius} L ${cx - radius + r} ${cy + radius} A ${r} ${r} 0 0 1 ${cx - radius} ${cy + radius - r} L ${cx - radius} ${cy - radius + r} A ${r} ${r} 0 0 1 ${cx - radius + r} ${cy - radius} Z`;
+        } else if (shape === 'hexagon') {
+          pathD = '';
+          for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI) / 3 - Math.PI / 2;
+            const x = cx + radius * Math.cos(angle);
+            const y = cy + radius * Math.sin(angle);
+            pathD += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)} `;
+          }
+          pathD += 'Z';
+        } else if (shape === 'triangle') {
+          pathD = '';
+          for (let i = 0; i < 3; i++) {
+            const angle = (i * 2 * Math.PI) / 3 - Math.PI / 2;
+            const x = cx + radius * Math.cos(angle);
+            const y = cy + radius * Math.sin(angle) + yOffset;
+            pathD += `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)} `;
+          }
+          pathD += 'Z';
+        }
+
+        const dashArray = isDashed ? `${(Math.PI * radius * 2 * (sweepPercent / 100) / dashCount) - dashGap} ${dashGap}` : 'none';
+
+        let svgHtml = `<!-- Ultra-Lightweight Vector SVG Spinner -->\n<div class="loader-container">\n`;
+
+        let easingVal = 'linear';
+        if (easing === 'ease-in-out') easingVal = 'ease-in-out';
+        else if (easing === 'steps') easingVal = 'steps(12, end)';
+        else if (easing === 'bounce') easingVal = 'cubic-bezier(0.68, -0.6, 0.32, 1.6)';
+
+        let spinAnimations = `spin ${speed}s ${easingVal} infinite`;
+        if (hueSpeed > 0) {
+          spinAnimations += `, hue-shift ${hueSpeed}s linear infinite`;
+        }
+
+        // Apply Mirror Reflection styling with correct origin directly on SVG root container!
+        const mirrorSVGStyles = !toggleMirror.checked ? 'transform: scaleX(-1); transform-origin: center;' : '';
+
+        svgHtml += `  <svg class="loader-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none" xmlns="http://www.w3.org/2000/svg" style="${mirrorSVGStyles}">\n`;
+        svgHtml += `    <defs>\n`;
+        svgHtml += `      <linearGradient id="svgGrad" x1="0%" y1="0%" x2="100%" y2="100%">\n`;
+        svgHtml += svgGradientDefs;
+        svgHtml += `      </linearGradient>\n`;
+        if (glowOn) {
+          svgHtml += `      <filter id="svgGlow" x="-20%" y="-20%" width="140%" height="140%">\n`;
+          svgHtml += `        <feGaussianBlur stdDeviation="${blur / 2}" result="blur" />\n`;
+          svgHtml += `        <feMerge>\n`;
+          svgHtml += `          <feMergeNode in="blur" />\n          <feMergeNode in="SourceGraphic" />\n`;
+          svgHtml += `        </feMerge>\n`;
+          svgHtml += `      </filter>\n`;
+        }
+        svgHtml += `    </defs>\n`;
+
+        // Draw SVG guide track if toggled
+        if (showTrack) {
+          svgHtml += `    <!-- Guide Track Path -->\n    <path d="${pathD}" stroke="${trackColorHex}" stroke-width="${thickness}" stroke-opacity="${trackOpacityValNum}" stroke-linecap="${strokeCap}" />\n`;
+        }
+
+        // SVG clipPath implementation to clip complex polygon shapes cleanly inside SVG output!
+        if (sweepPercent < 100 && shape !== 'circle') {
+          svgHtml += `    <clipPath id="svgClip">\n`;
+          const arcX1 = cx + size * Math.cos(startRad);
+          const arcY1 = cy + size * Math.sin(startRad);
+          const arcX2 = cx + size * Math.cos(endRad);
+          const arcY2 = cy + size * Math.sin(endRad);
+          const largeArcFlag = sweepPercent > 50 ? 1 : 0;
+          svgHtml += `      <path d="M ${cx} ${cy} L ${arcX1.toFixed(1)} ${arcY1.toFixed(1)} A ${size} ${size} 0 ${largeArcFlag} 1 ${arcX2.toFixed(1)} ${arcY2.toFixed(1)} Z" />\n`;
+          svgHtml += `    </clipPath>\n`;
+        }
+
+        const clipAttr = (sweepPercent < 100 && shape !== 'circle') ? ` clip-path="url(#svgClip)"` : '';
+        const capValue = sweepPercent < 100 ? 'butt' : strokeCap; // Force flat on main path segments
+
+        if (glowOn) {
+          svgHtml += `    <!-- Glow element -->\n    <path d="${pathD}" stroke="url(#svgGrad)" stroke-width="${thickness}" stroke-linecap="${capValue}" stroke-dasharray="${dashArray}" filter="url(#svgGlow)" opacity="0.75" style="mix-blend-mode: ${blendMode};"${clipAttr} />\n`;
+        }
+
+        svgHtml += `    <!-- Primary stroke -->\n    <path d="${pathD}" stroke="url(#svgGrad)" stroke-width="${thickness}" stroke-linecap="${capValue}" stroke-dasharray="${dashArray}"${clipAttr} />\n`;
+
+        // Draw separate custom round caps in SVG vector namespace
+        if (sweepPercent < 100) {
+          const r_s = getDistanceAtAngle(shape, startRad, radius);
+          const r_e = getDistanceAtAngle(shape, endRad, radius);
+          const hx = cx + r_s * Math.cos(startRad);
+          const hy = cy + r_s * Math.sin(startRad) + yOffset;
+          const tx = cx + r_e * Math.cos(endRad);
+          const ty = cy + r_e * Math.sin(endRad) + yOffset;
+
+          const hColor = toggleGlowOverride.checked ? colorGlowOverride.value : colorStops[0].color;
+          const tColor = toggleGlowOverride.checked ? colorGlowOverride.value : getColorAtRatio(sweepPercent / 100, colorStops);
+
+          if (roundHead) {
+            if (glowOn) {
+              svgHtml += `    <!-- Glow Round Head Cap -->\n    <circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${thickness / 2}" fill="${hColor}" filter="url(#svgGlow)" opacity="0.75" style="mix-blend-mode: ${blendMode};" />\n`;
+            }
+            svgHtml += `    <!-- Round Head Cap -->\n    <circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${thickness / 2}" fill="${hColor}" />\n`;
+          }
+
+          if (roundTail) {
+            const tailOpacity = comet ? 0 : 1;
+            if (glowOn) {
+              svgHtml += `    <!-- Glow Round Tail Cap -->\n    <circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${thickness / 2}" fill="${tColor}" filter="url(#svgGlow)" opacity="${0.75 * tailOpacity}" style="mix-blend-mode: ${blendMode};" />\n`;
+            }
+            svgHtml += `    <!-- Round Tail Cap -->\n    <circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="${thickness / 2}" fill="${tColor}" fill-opacity="${tailOpacity}" />\n`;
+          }
+        }
+
+        svgHtml += `  </svg>\n</div>`;
+
+        let css = `.loader-container {\n  width: ${size}px;\n  height: ${size}px;\n  animation: ${spinAnimations};\n}\n\n@keyframes spin {\n  to { transform: rotate(360deg); }\n}`;
+
+        if (hueSpeed > 0) {
+          css += `\n\n@keyframes hue-shift {\n  to { filter: hue-rotate(360deg); }\n}`;
+        }
+
+        codeOutput.textContent = `${svgHtml}\n\n<style>\n${css}\n</style>`;
+      }
+    }
+
+    // Direction controllers
+    btnDirCw.addEventListener('click', () => {
+      direction = 'cw';
+      btnDirCw.className = 'text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      btnDirCcw.className = 'text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      updateLoader();
+    });
+
+    btnDirCcw.addEventListener('click', () => {
+      direction = 'ccw';
+      btnDirCcw.className = 'text-slate-300 hover:text-white bg-slate-800 text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      btnDirCw.className = 'text-slate-400 hover:text-white text-[11px] py-1.5 rounded-lg font-medium transition-all';
+      updateLoader();
+    });
+
+    // Backdrop Simulator mappings
+    const resetBgButtons = () => {
+      ['btnBgDark', 'btnBgLight', 'btnBgGrid', 'btnBgCustom'].forEach(id => {
+        document.getElementById(id).className = 'text-slate-400 hover:text-white text-[10px] py-1.5 rounded-lg font-semibold';
+      });
+    };
+
+    document.getElementById('btnBgDark').addEventListener('click', () => {
+      resetBgButtons();
+      document.getElementById('btnBgDark').className = 'text-slate-300 hover:text-white bg-slate-800 text-[10px] py-1.5 rounded-lg font-semibold';
+      previewSandbox.className = previewSandbox.className.replace(/\bbg-\S+/g, '') + ' bg-slate-950';
+      backdropGrid.style.opacity = '1';
+      backdropCustomColor.style.opacity = '0';
+    });
+
+    document.getElementById('btnBgLight').addEventListener('click', () => {
+      resetBgButtons();
+      document.getElementById('btnBgLight').className = 'text-slate-300 hover:text-white bg-slate-850 text-[10px] py-1.5 rounded-lg font-semibold';
+      previewSandbox.className = previewSandbox.className.replace(/\bbg-\S+/g, '') + ' bg-slate-100';
+      backdropGrid.style.opacity = '0.3';
+      backdropCustomColor.style.opacity = '0';
+    });
+
+    document.getElementById('btnBgGrid').addEventListener('click', () => {
+      resetBgButtons();
+      document.getElementById('btnBgGrid').className = 'text-slate-300 hover:text-white bg-slate-800 text-[10px] py-1.5 rounded-lg font-semibold';
+      previewSandbox.className = previewSandbox.className.replace(/\bbg-\S+/g, '') + ' bg-checkerboard';
+      backdropGrid.style.opacity = '0';
+      backdropCustomColor.style.opacity = '0';
+    });
+
+    const colorCustomBg = document.getElementById('colorCustomBg');
+    document.getElementById('btnBgCustom').addEventListener('click', () => {
+      resetBgButtons();
+      document.getElementById('btnBgCustom').className = 'text-slate-300 hover:text-white bg-slate-800 text-[10px] py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1';
+      backdropCustomColor.style.backgroundColor = colorCustomBg.value;
+      backdropCustomColor.style.opacity = '1';
+    });
+    colorCustomBg.addEventListener('input', () => {
+      if (backdropCustomColor.style.opacity === '1') {
+        backdropCustomColor.style.backgroundColor = colorCustomBg.value;
+      }
+    });
+
+    // Preset loading scripts
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const type = e.currentTarget.getAttribute('data-preset');
+        if (type === 'purple-green') {
+          colorStops = [
+            { id: '1', color: '#a855f7', opacity: 1.0, position: 0.0 },
+            { id: '2', color: '#22c55e', opacity: 1.0, position: 0.5 },
+            { id: '3', color: '#a855f7', opacity: 1.0, position: 1.0 }
+          ];
+        } else if (type === 'rainbow-tri') {
+          colorStops = [
+            { id: '1', color: '#a855f7', opacity: 1.0, position: 0.0 },
+            { id: '2', color: '#22c55e', opacity: 1.0, position: 0.33 },
+            { id: '3', color: '#ec4899', opacity: 1.0, position: 0.66 },
+            { id: '4', color: '#a855f7', opacity: 1.0, position: 1.0 }
+          ];
+        } else if (type === 'neon-cyber') {
+          colorStops = [
+            { id: '1', color: '#00f2fe', opacity: 1.0, position: 0.0 },
+            { id: '2', color: '#4facfe', opacity: 0.8, position: 0.5 },
+            { id: '3', color: '#00f2fe', opacity: 1.0, position: 1.0 }
+          ];
+        } else if (type === 'fire-sweep') {
+          colorStops = [
+            { id: '1', color: '#f97316', opacity: 1.0, position: 0.0 },
+            { id: '2', color: '#ef4444', opacity: 1.0, position: 0.5 },
+            { id: '3', color: '#e11d48', opacity: 0.6, position: 0.8 },
+            { id: '4', color: '#f97316', opacity: 1.0, position: 1.0 }
+          ];
+        }
+
+        renderStops();
+        updateLoader();
+      });
+    });
+
+    // Code Exporter Tab Navigation
+    tabCssBtn.addEventListener('click', () => {
+      activeTab = 'css';
+      tabCssBtn.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-purple-400 border-b-2 border-purple-500 transition-all';
+      [tabCanvasBtn, tabSvgBtn].forEach(b => b.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all');
+      updateLoader();
+    });
+
+    tabCanvasBtn.addEventListener('click', () => {
+      activeTab = 'canvas';
+      tabCanvasBtn.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-purple-400 border-b-2 border-purple-500 transition-all';
+      [tabCssBtn, tabSvgBtn].forEach(b => b.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all');
+      updateLoader();
+    });
+
+    tabSvgBtn.addEventListener('click', () => {
+      activeTab = 'svg';
+      tabSvgBtn.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-purple-400 border-b-2 border-purple-500 transition-all';
+      [tabCssBtn, tabCanvasBtn].forEach(b => b.className = 'px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-all');
+      updateLoader();
+    });
+
+    // Copy block script
+    btnCopy.addEventListener('click', () => {
+      const codeText = codeOutput.textContent;
+      const textArea = document.createElement("textarea");
+      textArea.value = codeText;
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          toast.classList.remove('translate-y-24', 'opacity-0');
+          toast.classList.add('translate-y-0', 'opacity-100');
+          setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-24', 'opacity-0');
+          }, 2500);
+        }
+      } catch (err) {
+        console.error('Clipboard copy failed', err);
+      }
+      document.body.removeChild(textArea);
+    });
+
+    // Animation restart handler
+    btnReload.addEventListener('click', () => {
+      loaderContainer.style.animation = 'none';
+      void loaderContainer.offsetWidth; // Force element reflow
+      updateLoader();
+    });
+
+    // Central Progress Counter Loop Animation
+    const percentRate = 0.35;
+    const tickPercentageCounter = () => {
+      if (selectCenterpiece.value === 'percent') {
+        centerpiecePercentage = (centerpiecePercentage + percentRate) % 100;
+        centerpieceText.textContent = `${Math.floor(centerpiecePercentage)}%`;
+      }
+      requestAnimationFrame(tickPercentageCounter);
+    };
+
+    // Form Event Listeners mapping
+    [selectShape, toggleTaper, toggleComet, toggleDashed, sliderDashCount, sliderDashGap, sliderSize, sliderThickness, sliderSpeed, selectEasing, toggleBreathing, toggleReversing, toggleGlow, sliderBlur, selectBlendMode, toggleGlowOverride, colorGlowOverride, selectCenterpiece, inputCenterText, sliderSweep, selectStrokeCap, sliderHueSpeed, sliderOffset, toggleRoundHead, toggleRoundTail, toggleTrack, sliderTrackOpacity, colorTrack, toggleMorph].forEach(el => {
+      el.addEventListener('input', updateLoader);
+      el.addEventListener('change', updateLoader);
+    });
+
+    // Setup Startup Lifecycle
+    function init() {
+      renderStops();
+      updateLoader();
+      requestAnimationFrame(tickPercentageCounter);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      init();
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+    }
+  </script>
+</body>
+</html>
